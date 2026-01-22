@@ -3,233 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Parmak İzi - Sanatsal QR</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <title>Sanatsal İzi Oluşturucu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* Modern ve Temiz Tasarım */
+        /* Genel stil ayarları */
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
-            color: #e0e0e0;
+            color: #eee;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
             padding: 20px;
+            margin: 0;
         }
-
-        h1 {
-            font-weight: 300;
-            letter-spacing: 4px;
-            color: #00e676;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        
-        .desc { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
-
-        .container {
+        /* Kontrol panelinin görünümü */
+        .controls {
             background: #1e1e1e;
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border-radius: 16px;
             width: 100%;
-            max-width: 500px;
-            border: 1px solid #333;
+            max-width: 450px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-
-        label { display: block; margin-top: 15px; color: #aaa; font-size: 0.9rem;}
-        
-        input, button {
+        /* Giriş alanları ve butonlar için genel stil */
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #aaa;
+        }
+        .control-group input,
+        .control-group select,
+        .control-group button {
             width: 100%;
-            padding: 15px;
-            margin-top: 5px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             border: none;
-            background: #2c2c2c;
+            background: #2d2d2d;
             color: #fff;
             font-size: 1rem;
             box-sizing: border-box;
-            outline: none;
         }
-
-        input:focus { border: 1px solid #00e676; }
-
-        input[type="color"] { height: 50px; padding: 2px; cursor: pointer; }
-
-        button {
-            background: linear-gradient(45deg, #00e676, #00bfa5);
-            color: #000;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* Renk seçicinin görünümü */
+        input[type="color"] {
+            padding: 0;
+            height: 40px;
             cursor: pointer;
-            transition: transform 0.2s;
-            margin-top: 25px;
         }
-
-        button:active { transform: scale(0.98); }
-        
-        .preview-box {
-            margin-top: 30px;
+        /* Buton stilleri */
+        .btn-create {
+            background-color: #00c853;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-create:hover {
+            background-color: #00e676;
+        }
+        .btn-download {
+            background-color: #ff4081;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+            display: none; /* Başlangıçta gizli */
+        }
+        .btn-download:hover {
+            background-color: #f50057;
+        }
+        /* Önizleme alanı */
+        .preview-container {
             padding: 10px;
-            background: #fff; /* Baskı önizlemesi için beyaz zemin */
-            border-radius: 10px;
-            display: inline-block;
+            background: white;
+            border-radius: 12px;
+            display: none; /* Başlangıçta gizli */
         }
-
         canvas {
+            display: block;
             max-width: 100%;
             height: auto;
-            display: block;
-        }
-
-        .download-btn {
-            background: #ff4081;
-            color: white;
-            display: none; /* Başta gizli */
         }
     </style>
 </head>
 <body>
 
-    <h1>Dijital Parmak İzi</h1>
-    <p class="desc">Her dokunuşta benzersiz bir iz bırak.</p>
+    <div class="controls">
+        <h2 style="text-align: center; color: #00c853;">🎨 Sanatsal İz Oluşturucu</h2>
+        
+        <div class="control-group">
+            <label for="linkInput">🔗 Gömülecek Link:</label>
+            <input type="text" id="linkInput" placeholder="https://..." value="https://example.com">
+        </div>
 
-    <div class="container">
-        <label>🔗 Gömülecek Link:</label>
-        <input type="text" id="linkData" placeholder="https://..." value="https://instagram.com">
+        <div class="control-group">
+            <label for="colorInput">🎨 İz Rengi:</label>
+            <input type="color" id="colorInput" value="#000000">
+        </div>
 
-        <label>🎨 Mürekkep Rengi:</label>
-        <input type="color" id="inkColor" value="#0044ff">
+        <div class="control-group">
+            <label for="styleInput">🌀 Tarz Seçin:</label>
+            <select id="styleInput">
+                <option value="fingerprint">Parmak İzi</option>
+                <option value="ink-splatter">Mürekkep Lekesi</option>
+            </select>
+        </div>
 
-        <button onclick="createFingerprint()">🧬 İzi Oluştur</button>
-        <button id="dlBtn" class="download-btn" onclick="downloadPrint()">💾 40x30cm Tabloyu İndir</button>
+        <button class="btn-create" onclick="generateArt()">✨ İzi Oluştur</button>
+        <button class="btn-download" id="dlBtn" onclick="downloadPDF()">💾 40x30cm PDF İndir (300 DPI)</button>
     </div>
 
-    <div class="preview-box">
+    <div class="preview-container" id="previewContainer">
         <canvas id="previewCanvas"></canvas>
     </div>
 
     <script>
-        // 40cm x 30cm @ 300 DPI Hesaplaması
-        // 1 inch = 2.54 cm
-        // 300 DPI = 118.11 piksel/cm
-        // Genişlik (40cm): ~4724 px
-        // Yükseklik (30cm): ~3543 px
-        const PRINT_W = 4724;
-        const PRINT_H = 3543;
-        
-        let qrDataMatrix = null; // QR verisini tutacak değişken
-        let uniqueID = ""; // O anki benzersiz kod
+        const PRINT_W = 4724; // 40cm @ 300 DPI
+        const PRINT_H = 3543; // 30cm @ 300 DPI
+        let uniqueID = '';
+        let currentStyle = 'fingerprint';
 
-        function createFingerprint() {
-            let url = document.getElementById("linkData").value;
-            if(!url) { alert("Link girmelisin!"); return; }
-
-            // 1. BENZERSİZLİK MOTORU (SALTING)
-            // Linkin sonuna görünmez bir damga vuruyoruz.
-            // Bu sayede link aynı olsa bile QR deseni her seferinde değişiyor.
-            uniqueID = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-            let finalUrl = url.includes("?") ? `${url}&uid=${uniqueID}` : `${url}?uid=${uniqueID}`;
-
-            console.log("Üretilen Benzersiz Link:", finalUrl);
-
-            // 2. QR MATRIX HESAPLAMA
-            // TypeNumber 0 (Otomatik), Hata Düzeltme 'H' (High - Deseni yoğunlaştırır)
-            let qr = qrcode(0, 'H'); 
-            qr.addData(finalUrl);
-            qr.make();
-            qrDataMatrix = qr; // Veriyi kaydet
-
-            // 3. ÖNİZLEME ÇİZİMİ
-            // Telefonta kasmaması için küçük boyutta çiziyoruz
-            drawToCanvas(document.getElementById("previewCanvas"), 600, 450); // 4:3 oranında küçük
-            
-            // İndirme butonunu aç
-            let btn = document.getElementById("dlBtn");
-            btn.style.display = "block";
-            btn.innerText = `💾 40x30cm İNDİR (${uniqueID})`;
-        }
-
-        // --- ÇİZİM MOTORU (Magic Happens Here) ---
-        function drawToCanvas(canvas, width, height) {
-            let ctx = canvas.getContext("2d");
-            canvas.width = width;
-            canvas.height = height;
-
-            // Kağıt Rengi (Beyaz)
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, width, height);
-
-            if(!qrDataMatrix) return;
-
-            let count = qrDataMatrix.getModuleCount();
-            
-            // QR Kodun Boyutunu Ayarla (Tuvalin %70'i kadar olsun)
-            let qrSize = Math.min(width, height) * 0.70;
-            let startX = (width - qrSize) / 2;
-            let startY = (height - qrSize) / 2;
-            let cellSize = qrSize / count; // Her bir noktanın boyutu
-
-            let color = document.getElementById("inkColor").value;
-            ctx.fillStyle = color;
-
-            // MATRİSİ TARAYIP "MÜREKKEP DAMLASI" GİBİ ÇİZME
-            for (let r = 0; r < count; r++) {
-                for (let c = 0; c < count; c++) {
-                    if (qrDataMatrix.isDark(r, c)) {
-                        
-                        // ORGANİK ETKİ:
-                        // Noktalar tam kare değil, yuvarlak olacak.
-                        // Yerleri milimetrik şaşacak (Mürekkep dağılması gibi).
-                        // Boyutları hafif değişecek.
-                        
-                        let randomX = (Math.random() - 0.5) * (cellSize * 0.2); // Hafif titreme X
-                        let randomY = (Math.random() - 0.5) * (cellSize * 0.2); // Hafif titreme Y
-                        let randomSize = (cellSize * 0.8) + (Math.random() * (cellSize * 0.4)); // Boyut değişimi
-
-                        let cx = startX + (c * cellSize) + (cellSize / 2) + randomX;
-                        let cy = startY + (r * cellSize) + (cellSize / 2) + randomY;
-
-                        ctx.beginPath();
-                        // Tam daire yerine hafif oval çizelim (Parmak izi dokusu gibi)
-                        ctx.ellipse(cx, cy, randomSize/2, randomSize/2.2, Math.random(), 0, 2 * Math.PI);
-                        ctx.fill();
-                    }
-                }
+        function generateArt() {
+            const link = document.getElementById('linkInput').value;
+            if (!link) {
+                alert("Lütfen bir link girin.");
+                return;
             }
 
-            // Altına Küçük İmza (Opsiyonel)
-            ctx.font = `${width/50}px monospace`;
-            ctx.fillStyle = "#ccc";
-            ctx.textAlign = "center";
-            ctx.fillText(uniqueID, width/2, height - (height/20));
+            uniqueID = Date.now().toString(36);
+            currentStyle = document.getElementById('styleInput').value;
+            
+            const previewCanvas = document.getElementById('previewCanvas');
+            const previewContainer = document.getElementById('previewContainer');
+            const dlBtn = document.getElementById('dlBtn');
+
+            // Önizleme için canvas boyutunu ayarla
+            previewCanvas.width = 800;
+            previewCanvas.height = 600;
+
+            // Seçilen stile göre çizim yap
+            if (currentStyle === 'fingerprint') {
+                drawFingerprint(previewCanvas, 800, 600, uniqueID);
+            } else {
+                drawInkSplatter(previewCanvas, 800, 600, uniqueID);
+            }
+
+            previewContainer.style.display = 'block';
+            dlBtn.style.display = 'block';
         }
 
-        // --- DEVASA BOYUTTA İNDİRME ---
-        function downloadPrint() {
-            if(!qrDataMatrix) return;
-            
-            // Kullanıcıya bilgi ver (Büyük dosya olduğu için)
-            let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ İŞLENİYOR... (BEKLEYİN)";
-            
-            // Tarayıcıyı kilitlememek için kısa bir gecikme ile başlat
-            setTimeout(() => {
-                let bigCanvas = document.createElement("canvas");
-                // 4724 x 3543 px boyutunda sanal tuval oluştur
-                drawToCanvas(bigCanvas, PRINT_W, PRINT_H);
-                
-                let link = document.createElement('a');
-                link.download = `ParmakIzi_QR_${uniqueID}.png`;
-                link.href = bigCanvas.toDataURL("image/png", 1.0); // En yüksek kalite
-                link.click();
+        // Parmak izi çizim fonksiyonu
+        function drawFingerprint(canvas, width, height, seed) {
+            const ctx = canvas.getContext('2d');
+            const color = document.getElementById('colorInput').value;
 
-                btn.innerText = `💾 40x30cm İNDİR (${uniqueID})`;
-            }, 100);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width / 150;
+            ctx.lineCap = 'round';
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const maxRadius = Math.min(width, height) * 0.4;
+            const numRings = 25;
+
+            // Rastgelelik için seed'i kullan
+            let rng = new Math.seedrandom(seed);
+
+            for (let i = 1; i <= numRings; i++) {
+                const radius = (i / numRings) * maxRadius;
+                const startAngle = rng() * Math.PI * 2;
+                const endAngle = startAngle + (Math.PI * 1.5) + (rng() * Math.PI * 0.5);
+                const counterclockwise = rng() > 0.5;
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle, counterclockwise);
+                ctx.stroke();
+
+                // Rastgele küçük kesintiler ve sapmalar ekle
+                if (rng() > 0.7) {
+                    const breakAngle = startAngle + (rng() * (endAngle - startAngle));
+                    const breakX = centerX + Math.cos(breakAngle) * radius;
+                    const breakY = centerY + Math.sin(breakAngle) * radius;
+                    ctx.clearRect(breakX - 2, breakY - 2, 4, 4);
+                }
+            }
         }
+
+        // Mürekkep lekesi çizim fonksiyonu
+        function drawInkSplatter(canvas, width, height, seed) {
+            const ctx = canvas.getContext('2d');
+            const color = document.getElementById('colorInput').value;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = color;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const numDrops = 50;
+            let rng = new Math.seedrandom(seed);
+
+            for (let i = 0; i < numDrops; i++) {
+                const angle = rng() * Math.PI * 2;
+                const distance = rng() * Math.min(width, height) * 0.4;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                const radius = (rng() * width / 20) * (1 - distance / (Math.min(width, height) * 0.4));
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        async function downloadPDF() {
+            const dlBtn = document.getElementById('dlBtn');
+            dlBtn.innerText = "⏳ PDF Hazırlanıyor...";
+            dlBtn.disabled = true;
+
+            const highResCanvas = document.createElement('canvas');
+            highResCanvas.width = PRINT_W;
+            highResCanvas.height = PRINT_H;
+
+            if (currentStyle === 'fingerprint') {
+                drawFingerprint(highResCanvas, PRINT_W, PRINT_H, uniqueID);
+            } else {
+                drawInkSplatter(highResCanvas, PRINT_W, PRINT_H, uniqueID);
+            }
+
+            const imgData = highResCanvas.toDataURL('image/png', 1.0);
+
+            const { jsPDF } = window.jspdf;
+            // 400mm x 300mm boyutunda PDF oluştur
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [400, 300]
+            });
+
+            // Görüntüyü PDF'e ekle
+            pdf.addImage(imgData, 'PNG', 0, 0, 400, 300);
+            
+            // PDF'i indir
+            pdf.save(`Sanatsal_Iz_${uniqueID}.pdf`);
+
+            dlBtn.innerText = "💾 40x30cm PDF İndir (300 DPI)";
+            dlBtn.disabled = false;
+        }
+
+        // Rastgele sayı üreteci için kütüphane (harici script olarak eklenmeli)
+        (function(a,b,c,d,e,f){a.Math.seedrandom=function(g,h,i){return h=h||{},h.a=h.a||1103515245,h.c=h.c||12345,i=i||a.Math.random,g=g||i(),function(){return g=g*h.a+h.c&2147483647}}})(window);
     </script>
 </body>
 </html>
