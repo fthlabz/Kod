@@ -3,227 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akışkan Sanat QR - 40x30</title>
+    <title>Emoji & Stil QR Oluşturucu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Courier New', monospace;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 20px;
             margin: 0;
-            padding: 20px;
         }
 
-        .controls {
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 500px;
-            background: #111;
-            padding: 20px;
-            border: 1px solid #333;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h2 { margin-top: 0; color: #2c3e50; }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+        
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
             border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        input, button, select {
-            width: 100%;
-            padding: 15px;
-            margin-top: 10px;
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
             font-size: 16px;
-            border-radius: 5px;
             box-sizing: border-box;
+            transition: 0.3s;
+        }
+        input:focus, select:focus { border-color: #333; outline: none; }
+
+        /* Emoji Giriş Alanı Özel Stil */
+        #emojiInput {
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 5px;
         }
 
         button {
-            background: #00ff99;
-            color: #000;
+            background: #222;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        button.download { background: #e91e63; display: none; }
+        button:hover { opacity: 0.9; }
+
+        .preview-box {
+            margin-top: 20px;
+            padding: 10px;
+            background: white;
+            border: 1px dashed #ccc;
+            border-radius: 10px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        button#dlBtn {
-            background: #ff0055;
-            color: #fff;
-            display: none;
-        }
-
-        .preview-area {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            display: none; /* Başlangıçta gizli */
-        }
-
-        canvas {
-            max-width: 100%;
-            height: auto;
-            box-shadow: 0 0 20px rgba(255,255,255,0.1);
-        }
+        canvas { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <h2 style="margin-top:0; color:#00ff99;">🧪 SIVI/MÜREKKEP QR</h2>
+    <div class="card">
+        <h2>🖤 Emoji QR Mozaik</h2>
         
-        <label>Hedef Link:</label>
-        <input type="text" id="linkInput" value="https://instagram.com" placeholder="https://...">
-
-        <label>Leke Rengi:</label>
-        <input type="color" id="inkColor" value="#000000" style="height:50px;">
-        
-        <label>Yoğunluk:</label>
-        <select id="density">
-            <option value="low">Seyrek (Daha Sanatsal)</option>
-            <option value="high">Yoğun (Daha Güvenli)</option>
-        </select>
-
-        <button onclick="generateLiquidArt()">🔥 Sanatı Dök</button>
-        <button id="dlBtn" onclick="downloadPDF()">💾 40x30cm PDF İNDİR</button>
-    </div>
-
-    <div class="preview-area" id="previewBox">
+        <div class="input-group">
+            <label>🔗 Web Sitesi / Link:</label>
+            <input type="text" id="urlInput" placeholder="https://..." value="https://instagram.com">
         </div>
+
+        <div class="input-group" style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label>😀 Emoji Seç:</label>
+                <input type="text" id="emojiInput" value="❤️" placeholder="Emoji yapıştır" maxlength="2">
+            </div>
+            <div style="flex: 1;">
+                <label>🔲 Köşe Stili:</label>
+                <select id="cornerStyle">
+                    <option value="square">Klasik Kare</option>
+                    <option value="rounded">Yumuşak (Rounded)</option>
+                    <option value="circle">Tam Daire</option>
+                    <option value="leaf">Yaprak (Leaf)</option>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="generateEmojiQR()">✨ SİHİRLİ QR OLUŞTUR</button>
+        <button class="download" id="dlBtn" onclick="downloadPDF()">💾 40x30cm PDF İNDİR</button>
+
+        <div class="preview-box" id="previewContainer">
+            <span style="color:#aaa;">Önizleme burada çıkacak...</span>
+        </div>
+    </div>
 
     <script>
         // 40cm x 30cm @ 300 DPI
-        const FULL_WIDTH = 4724; 
-        const FULL_HEIGHT = 3543;
+        const PRINT_W = 4724;
+        const PRINT_H = 3543;
+        let qrMatrix = null;
         
-        let currentQR = null;
-        let uniqueCode = "";
-
-        function generateLiquidArt() {
-            let url = document.getElementById("linkInput").value;
-            if(!url) return alert("Link gir!");
-
-            // 1. UNIQUE ID EKLE (Her seferinde farklı desen için)
-            uniqueCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            let finalUrl = url.includes("?") ? `${url}&id=${uniqueCode}` : `${url}?id=${uniqueCode}`;
-
-            // 2. QR DATASINI HESAPLA
-            // TypeNumber: 0 (Otomatik), Correction: H (Yüksek - Leke olsa da okunur)
-            let typeNumber = 0;
-            let errorCorrectionLevel = 'H';
-            let qr = qrcode(typeNumber, errorCorrectionLevel);
-            qr.addData(finalUrl);
-            qr.make();
-            currentQR = qr;
-
-            // 3. ÖNİZLEME ÇİZ
-            let previewContainer = document.getElementById("previewBox");
-            previewContainer.innerHTML = ""; // Temizle
+        function generateEmojiQR() {
+            let url = document.getElementById("urlInput").value;
+            let emoji = document.getElementById("emojiInput").value || "⬛"; // Emoji girilmezse kare yap
             
-            let canvas = document.createElement("canvas");
-            canvas.id = "artCanvas";
-            previewContainer.style.display = "block";
-            previewContainer.appendChild(canvas);
+            if(!url) return alert("Link girmeyi unuttun!");
 
-            // Önizleme boyutu (Küçük)
-            drawArt(canvas, 800, 600);
+            // 1. QR Matrisini Hesapla
+            let type = 0; // Auto
+            let err = 'H'; // Yüksek Hata Düzeltme (Emoji şekilleri bozsa bile okunsun diye)
+            let qr = qrcode(type, err);
+            qr.addData(url);
+            qr.make();
+            qrMatrix = qr;
+
+            // 2. Canvas Hazırla
+            let container = document.getElementById("previewContainer");
+            container.innerHTML = "";
+            let canvas = document.createElement("canvas");
+            // Önizleme için makul bir boyut
+            canvas.width = 800;
+            canvas.height = 800; 
+            container.appendChild(canvas);
+
+            // 3. Çizimi Başlat
+            drawCanvas(canvas, 800, emoji);
             
             // İndirme butonunu aç
-            let dlBtn = document.getElementById("dlBtn");
-            dlBtn.style.display = "block";
-            dlBtn.innerText = `💾 40x30cm PDF İNDİR (${uniqueCode})`;
+            document.getElementById("dlBtn").style.display = "block";
         }
 
-        function drawArt(canvas, width, height) {
+        function drawCanvas(canvas, size, emoji) {
             let ctx = canvas.getContext("2d");
-            canvas.width = width;
-            canvas.height = height;
+            let count = qrMatrix.getModuleCount();
+            let tileSize = size / count; // Her bir kareciğin boyutu
 
-            // Arka plan BEYAZ (Kontrast için şart)
+            // Temizle (Beyaz Arka Plan)
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillRect(0, 0, size, size);
 
-            let moduleCount = currentQR.getModuleCount();
-            let color = document.getElementById("inkColor").value;
-            
-            // QR Kodun yerleşimi (Ortada %70 yer kaplasın)
-            let size = Math.min(width, height) * 0.7;
-            let startX = (width - size) / 2;
-            let startY = (height - size) / 2;
-            let tileSize = size / moduleCount;
+            // Kömür Siyahı Efekti İçin Ayar
+            // Emojiler normalde renklidir. Canvas filtreleri ile siyah-beyaz yapıp karartacağız.
+            ctx.filter = "grayscale(100%) brightness(0%) contrast(200%)"; 
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            // Font boyutunu karenin biraz fazlası yapalım ki dolgun dursun
+            ctx.font = `${tileSize * 1.0}px Arial`; 
 
-            ctx.fillStyle = color;
+            let cornerStyle = document.getElementById("cornerStyle").value;
 
-            for (let r = 0; r < moduleCount; r++) {
-                for (let c = 0; c < moduleCount; c++) {
-                    if (currentQR.isDark(r, c)) {
-                        let x = startX + c * tileSize;
-                        let y = startY + r * tileSize;
+            for (let r = 0; r < count; r++) {
+                for (let c = 0; c < count; c++) {
+                    // Bu nokta QR'ın parçası mı?
+                    if (qrMatrix.isDark(r, c)) {
                         
-                        // BURASI SİHİRİN OLDUĞU YER:
-                        // Kare çizmek yerine "Akışkan Leke" fonksiyonunu çağırıyoruz.
-                        drawLiquidDrop(ctx, x, y, tileSize);
+                        // KÖŞE (FINDER PATTERN) KONTROLÜ
+                        // QR kodun 3 köşesindeki büyük gözleri tespit etmemiz lazım.
+                        // Sol Üst (0-7), Sağ Üst (count-7), Sol Alt (0-7)
+                        let isFinder = false;
+                        if ((r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7)) {
+                            isFinder = true;
+                        }
+
+                        if (isFinder) {
+                            // Köşeleri ayrıca çizeceğiz, o yüzden döngüde atlıyoruz.
+                            // (Aşağıda drawFinders fonksiyonu çizecek)
+                        } else {
+                            // VERİ ALANI: Buraya Emoji basıyoruz!
+                            let x = c * tileSize + tileSize / 2;
+                            let y = r * tileSize + tileSize / 2 + (tileSize * 0.1); // Hafif aşağı ofset
+                            ctx.fillText(emoji, x, y);
+                        }
                     }
                 }
             }
-            
-            // Altına Kod Yazısı
-            ctx.fillStyle = "#ccc";
-            ctx.font = "12px monospace";
-            ctx.fillText(uniqueCode, 10, height - 10);
+
+            // Filtreyi kapat (Köşeleri net siyah çizeceğiz, emoji değil)
+            ctx.filter = "none";
+            drawFinders(ctx, size, count, cornerStyle);
         }
 
-        function drawLiquidDrop(ctx, x, y, size) {
-            // Rastgele şekil parametreleri
-            let cx = x + size / 2;
-            let cy = y + size / 2;
-            let radius = (size / 2) * 1.3; // Biraz taşsın ki birleşsinler (Mürekkep etkisi)
+        // --- ÖZEL KÖŞE ÇİZİCİ (GÖZLER) ---
+        function drawFinders(ctx, totalSize, count, style) {
+            let tileSize = totalSize / count;
+            let finderSize = tileSize * 7; // Gözler her zaman 7x7 birimdir
 
+            // 3 Pozisyon: Sol-Üst, Sağ-Üst, Sol-Alt
+            let positions = [
+                [0, 0], 
+                [totalSize - finderSize, 0], 
+                [0, totalSize - finderSize]
+            ];
+
+            ctx.fillStyle = "#000000"; // Kömür Siyahı
+
+            positions.forEach(pos => {
+                let x = pos[0];
+                let y = pos[1];
+                let s = finderSize;
+                
+                // Dış Çerçeve
+                drawShape(ctx, x, y, s, style, true);
+                
+                // İçindeki Beyaz Boşluk (Frame kalınlığı genelde 1 birimdir)
+                ctx.fillStyle = "#ffffff";
+                let innerGap = tileSize; 
+                drawShape(ctx, x + innerGap, y + innerGap, s - innerGap*2, style, false);
+
+                // En İçteki Siyah Nokta (3x3 birim)
+                ctx.fillStyle = "#000000";
+                let centerDot = tileSize * 2;
+                drawShape(ctx, x + centerDot, y + centerDot, s - centerDot*2, style, true);
+            });
+        }
+
+        // Şekil Çizim Mantığı
+        function drawShape(ctx, x, y, size, style, fill) {
             ctx.beginPath();
             
-            // Basit bir daire yerine bozuk bir çokgen çiziyoruz (Leke efekti)
-            // Nokta sayısını ve açıyı rastgele değiştirerek organiklik katıyoruz
-            let points = 6 + Math.floor(Math.random() * 4); // 6-10 arası köşe
-            
-            for (let i = 0; i <= points; i++) {
-                let angle = (i / points) * Math.PI * 2;
-                // Yarıçapı rastgele daraltıp genişletiyoruz (%80 ile %120 arası)
-                let r = radius * (0.8 + Math.random() * 0.4); 
-                let px = cx + Math.cos(angle) * r;
-                let py = cy + Math.sin(angle) * r;
-                
-                if (i === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+            if (style === "square") {
+                ctx.rect(x, y, size, size);
+            } 
+            else if (style === "circle") {
+                let r = size / 2;
+                ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
+            } 
+            else if (style === "rounded") {
+                // Köşeleri yuvarlatılmış kare
+                let r = size * 0.2; // Yuvarlatma oranı
+                ctx.roundRect(x, y, size, size, r);
+            } 
+            else if (style === "leaf") {
+                // Yaprak efekti: İki köşe yuvarlak, iki köşe sivri
+                let r = size * 0.5;
+                ctx.moveTo(x, y); // Sol üst sivri
+                ctx.lineTo(x + size, y); 
+                ctx.arcTo(x + size, y + size, x, y + size, r); // Sağ alt yuvarlak
+                ctx.lineTo(x, y + size);
+                ctx.arcTo(x, y, x + size, y, r); // Sol alt yuvarlak
+                // Bu biraz basit yaprak oldu, CSS border-radius mantığı gibi:
+                // ctx.roundRect(x, y, size, size, [0, size/2, 0, size/2]); // Sadece modern tarayıcılarda çalışır
+                // Garanti yöntem:
+                ctx.roundRect(x, y, size, size, [size/2, 0, size/2, 0]); 
             }
             
-            ctx.closePath();
             ctx.fill();
         }
 
-        async function downloadPDF() {
+        // --- İNDİRME FONKSİYONU ---
+        function downloadPDF() {
             let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ HAZIRLANIYOR...";
-            
+            btn.innerText = "⏳ Hazırlanıyor...";
+
             setTimeout(() => {
-                // 1. Yüksek Çözünürlüklü Canvas Oluştur
+                // 1. Büyük Canvas Oluştur
                 let bigCanvas = document.createElement("canvas");
-                drawArt(bigCanvas, FULL_WIDTH, FULL_HEIGHT);
+                // PDF'in içine tam sığacak en yüksek kalite (yaklaşık 4000px)
+                let size = 2000; 
+                bigCanvas.width = size;
+                bigCanvas.height = size;
                 
-                // 2. PDF'e Çevir
+                let emoji = document.getElementById("emojiInput").value || "⬛";
+                drawCanvas(bigCanvas, size, emoji);
+
+                // 2. PDF Oluştur (40x30 cm Yatay)
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
                     orientation: "landscape",
-                    unit: "mm",
-                    format: [400, 300] // 40cm x 30cm
+                    unit: "cm",
+                    format: [40, 30]
                 });
 
+                // QR Kodu ortaya yerleştir (Kare olduğu için 30cm yüksekliğe sığdıracağız)
+                // 40cm genişlik var, 30cm yükseklik. Ortalamak için soldan 5cm boşluk bırakıyoruz.
                 let imgData = bigCanvas.toDataURL("image/jpeg", 1.0);
-                pdf.addImage(imgData, 'JPEG', 0, 0, 400, 300);
-                pdf.save(`Murekkep_QR_${uniqueCode}.pdf`);
-                
-                btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerText = `💾 40x30cm PDF İNDİR`, 2000);
+                pdf.addImage(imgData, 'JPEG', 5, 0, 30, 30); // x=5, y=0, w=30, h=30
+
+                pdf.save("Emoji_QR_Mozaik.pdf");
+                btn.innerText = "💾 40x30cm PDF İNDİR";
             }, 100);
         }
     </script>
