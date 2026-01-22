@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>40x30 Özel Baskı QR</title>
+    <title>40x30 Özel Baskı QR - V4 (Garanti Mod)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         body {
@@ -45,7 +45,8 @@
         }
 
         input[type="color"] { height: 50px; padding: 2px; cursor: pointer; }
-        #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; }
+        /* Emoji girişi için özel font ayarı - Telefondaki görünümü iyileştirir */
+        #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
 
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
@@ -88,8 +89,8 @@
 <body>
 
     <div class="panel">
-        <h2>🖨️ 40x30 Baskı Motoru</h2>
-        <div class="res-info">Çıktı Boyutu: 3780 x 2835 px</div>
+        <h2>🖨️ 40x30 Baskı Motoru V4</h2>
+        <div class="res-info">Çıktı Boyutu: 3780 x 2835 px (Garanti Mod)</div>
         
         <label>🔗 Hedef Link:</label>
         <input type="text" id="url" value="https://instagram.com" placeholder="https://...">
@@ -136,17 +137,13 @@
     </div>
 
     <script>
-        // --- SENİN VERDİĞİN NET ÖLÇÜLER ---
+        // --- ÖLÇÜLER (DEĞİŞMEDİ) ---
         const TARGET_W = 3780; // 40 cm
         const TARGET_H = 2835; // 30 cm
-        
-        // 2mm boşluk hesabı (Yaklaşık)
-        // 40cm = 3780px ise 1cm ~ 94.5px, 1mm ~ 9.5px
-        // 2mm ~ 19px. Biz garanti olsun diye 25px verelim.
-        const MARGIN_PX = 25; 
+        const MARGIN_PX = 25; // ~2mm boşluk
 
         let qrData = null;
-        let tintedEmoji = null;
+        // tintedEmoji değişkenini kaldırdık, artık gerek yok.
 
         function prepareAndPreview() {
             let url = document.getElementById("url").value;
@@ -158,52 +155,21 @@
             qr.make();
             qrData = qr;
 
-            // 2. Emojiyi Boya ve Önizlemeyi Göster
-            prepareColoredEmoji(function() {
-                // Önizleme için küçük bir canvas kullan (Telefon kasmaması için)
-                // Oran korunsun: 3780/2835 = 1.33
-                let previewW = 800;
-                let previewH = 600;
-                let canvas = document.getElementById("previewCanvas");
-                
-                // Önizleme Çizimi
-                drawArt(canvas, previewW, previewH);
-                
-                document.getElementById("previewContainer").style.display = "block";
-                document.getElementById("dlBtn").style.display = "block";
-            });
+            // 2. Emojiyi Boyama kısmını kaldırdık. Direkt çizime geçiyoruz.
+            
+            // Önizleme için küçük boyut
+            let previewW = 800;
+            let previewH = 600; // 4:3 oranı koru
+            let canvas = document.getElementById("previewCanvas");
+            
+            // Önizleme Çizimi
+            drawArt(canvas, previewW, previewH);
+            
+            document.getElementById("previewContainer").style.display = "block";
+            document.getElementById("dlBtn").style.display = "block";
         }
 
-        // --- EMOJİ RENKLENDİRME ---
-        function prepareColoredEmoji(callback) {
-            let emojiChar = document.getElementById("emoji").value || "⬛";
-            let color = document.getElementById("color").value;
-            let size = 150; // Render kalitesi
-
-            let c = document.createElement("canvas");
-            c.width = size;
-            c.height = size;
-            let ctx = c.getContext("2d");
-
-            ctx.font = `${size * 0.9}px Arial`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(emojiChar, size/2, size/2 + (size*0.1));
-
-            // Renk maskeleme (Source-in)
-            ctx.globalCompositeOperation = "source-in";
-            ctx.fillStyle = color;
-            ctx.fillRect(0, 0, size, size);
-
-            let img = new Image();
-            img.onload = function() {
-                tintedEmoji = img;
-                callback();
-            };
-            img.src = c.toDataURL();
-        }
-
-        // --- ANA ÇİZİM MOTORU ---
+        // --- ANA ÇİZİM MOTORU (YENİLENDİ - BASİTLEŞTİRİLDİ) ---
         function drawArt(canvas, w, h) {
             let ctx = canvas.getContext("2d");
             canvas.width = w;
@@ -213,41 +179,44 @@
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
-            // 2. Ölçekleme Hesabı
-            // Orijinal boyutlara (3780x2835) göre oran
-            let scaleX = w / TARGET_W;
+            // 2. Ölçekleme ve Yerleşim Hesabı
             let scaleY = h / TARGET_H;
-            
-            // Biz QR kodun kare kalmasını ve dikeyde (30cm tarafında) sığmasını istiyoruz.
-            // Yükseklikten payları düş:
             let availableH = TARGET_H - (MARGIN_PX * 2);
-            let qrSizeOriginal = availableH; // QR tam kare olacak
-            
-            // Şimdiki canvas boyutuna uyarla
+            let qrSizeOriginal = availableH; 
             let qrSize = qrSizeOriginal * scaleY; 
             
-            // Ortala
             let startX = (w - qrSize) / 2;
-            let startY = (MARGIN_PX * scaleY); // Üstten boşluk payı
+            let startY = (MARGIN_PX * scaleY); 
 
             let count = qrData.getModuleCount();
             let tileSize = qrSize / count;
             let mainColor = document.getElementById("color").value;
+            let emojiChar = document.getElementById("emoji").value || "⬛";
 
-            // 3. Emojileri Bas
+            // 3. EMOJİLERİ BAS (YENİ YÖNTEM: DOĞRUDAN YAZI OLARAK)
+            ctx.fillStyle = mainColor; // Rengi ayarla
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            // Font boyutunu karenin %90'ı yapalım ki taşmasın
+            ctx.font = `${tileSize * 0.9}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
                         if (isFinder(r, c, count)) continue; // Köşeleri atla
 
-                        let x = startX + c * tileSize;
-                        let y = startY + r * tileSize;
-                        ctx.drawImage(tintedEmoji, x, y, tileSize, tileSize);
+                        // Merkeze konumlandır
+                        let x = startX + c * tileSize + tileSize / 2;
+                        let y = startY + r * tileSize + tileSize / 2;
+                        
+                        // ESKİ YÖNTEM (Resim çizme): ctx.drawImage(...) - ÇÖP
+                        // YENİ YÖNTEM (Yazı yazma): - GARANTİ
+                        ctx.fillText(emojiChar, x, y);
                     }
                 }
             }
 
-            // 4. Köşeleri Çiz
+            // 4. Köşeleri Çiz (Bu kısım aynı)
             drawFinders(ctx, startX, startY, qrSize, count, tileSize, mainColor);
         }
 
@@ -312,7 +281,8 @@
                 
                 let link = document.createElement('a');
                 link.download = `Baski_40x30_${Date.now()}.jpg`;
-                link.href = bigCanvas.toDataURL("image/jpeg", 0.95); // En yüksek kalite JPEG
+                // Kaliteyi %95'e çektim, dosya boyutu aşırı şişmesin ama kalite düşmesin
+                link.href = bigCanvas.toDataURL("image/jpeg", 0.95); 
                 link.click();
 
                 btn.innerText = "✅ İNDİRİLDİ";
