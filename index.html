@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji & Stil QR Oluşturucu</title>
+    <title>Pro Emoji QR Oluşturucu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212; /* Koyu Tema */
+            color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -18,288 +18,296 @@
             margin: 0;
         }
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        .container {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 16px;
             width: 100%;
-            max-width: 450px;
-            text-align: center;
+            max-width: 400px; /* Telefon ekranına uygun */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        h2 { margin-top: 0; color: #2c3e50; }
+        h2 { text-align: center; color: #00e676; margin-top: 0; }
 
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
-        
-        input[type="text"], select {
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        input, select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 10px;
+            margin-top: 5px;
+            background: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
             font-size: 16px;
             box-sizing: border-box;
-            transition: 0.3s;
         }
-        input:focus, select:focus { border-color: #333; outline: none; }
 
-        /* Emoji Giriş Alanı Özel Stil */
+        /* Emoji Girişi Ortada ve Büyük */
         #emojiInput {
-            font-size: 24px;
             text-align: center;
+            font-size: 24px;
             letter-spacing: 5px;
         }
 
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+
         button {
-            background: #222;
-            color: white;
-            border: none;
-            padding: 15px;
             width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
             border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            text-transform: uppercase;
         }
-        button.download { background: #e91e63; display: none; }
-        button:hover { opacity: 0.9; }
 
-        .preview-box {
+        .btn-gen { background: #00e676; color: #000; }
+        .btn-pdf { background: #ff4081; color: #fff; display: none; margin-top: 10px; }
+        .btn-img { background: #2979ff; color: #fff; display: none; margin-top: 10px; }
+
+        #previewContainer {
             margin-top: 20px;
+            background: #fff;
             padding: 10px;
-            background: white;
-            border: 1px dashed #ccc;
-            border-radius: 10px;
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 12px;
+            display: none;
+            text-align: center;
         }
-        
-        canvas { max-width: 100%; height: auto; }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>🖤 Emoji QR Mozaik</h2>
+    <div class="container">
+        <h2>🖤 PRO QR STUDIO</h2>
         
-        <div class="input-group">
-            <label>🔗 Web Sitesi / Link:</label>
-            <input type="text" id="urlInput" placeholder="https://..." value="https://instagram.com">
+        <label>🔗 Hedef Link:</label>
+        <input type="text" id="urlInput" value="https://instagram.com" placeholder="https://...">
+
+        <div class="row">
+            <div class="col">
+                <label>😀 Desen (Emoji):</label>
+                <input type="text" id="emojiInput" value="❤️" placeholder="Emoji">
+            </div>
         </div>
 
-        <div class="input-group" style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-                <label>😀 Emoji Seç:</label>
-                <input type="text" id="emojiInput" value="❤️" placeholder="Emoji yapıştır" maxlength="2">
+        <div class="row">
+            <div class="col">
+                <label>🔲 Dış Çerçeve:</label>
+                <select id="frameStyle">
+                    <option value="square">Kare (Klasik)</option>
+                    <option value="rounded">Yumuşak</option>
+                    <option value="circle">Yuvarlak</option>
+                    <option value="leaf">Yaprak</option>
+                </select>
             </div>
-            <div style="flex: 1;">
-                <label>🔲 Köşe Stili:</label>
-                <select id="cornerStyle">
-                    <option value="square">Klasik Kare</option>
-                    <option value="rounded">Yumuşak (Rounded)</option>
-                    <option value="circle">Tam Daire</option>
-                    <option value="leaf">Yaprak (Leaf)</option>
+            <div class="col">
+                <label>⚫ İç Nokta:</label>
+                <select id="dotStyle">
+                    <option value="square">Kare</option>
+                    <option value="circle">Yuvarlak</option>
+                    <option value="diamond">Elmas</option>
                 </select>
             </div>
         </div>
 
-        <button onclick="generateEmojiQR()">✨ SİHİRLİ QR OLUŞTUR</button>
-        <button class="download" id="dlBtn" onclick="downloadPDF()">💾 40x30cm PDF İNDİR</button>
-
-        <div class="preview-box" id="previewContainer">
-            <span style="color:#aaa;">Önizleme burada çıkacak...</span>
+        <button class="btn-gen" onclick="generateQR()">✨ Tasarımı Oluştur</button>
+        
+        <div id="previewContainer">
+            <canvas id="qrCanvas"></canvas>
         </div>
+
+        <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">📄 PDF Olarak İndir</button>
+        <button class="btn-img" id="btnImg" onclick="downloadImage()">🖼️ Galeriye Kaydet (JPG)</button>
     </div>
 
     <script>
-        // 40cm x 30cm @ 300 DPI
-        const PRINT_W = 4724;
-        const PRINT_H = 3543;
         let qrMatrix = null;
-        
-        function generateEmojiQR() {
-            let url = document.getElementById("urlInput").value;
-            let emoji = document.getElementById("emojiInput").value || "⬛"; // Emoji girilmezse kare yap
-            
-            if(!url) return alert("Link girmeyi unuttun!");
+        // Çıktı kalitesi (Piksel cinsinden kenar uzunluğu)
+        const OUTPUT_SIZE = 2000; 
 
-            // 1. QR Matrisini Hesapla
-            let type = 0; // Auto
-            let err = 'H'; // Yüksek Hata Düzeltme (Emoji şekilleri bozsa bile okunsun diye)
+        function generateQR() {
+            let url = document.getElementById("urlInput").value;
+            let emoji = document.getElementById("emojiInput").value || "⬛";
+            
+            if(!url) return alert("Link girilmeli!");
+
+            // 1. QR Matematiksel Hesaplama
+            let type = 0; // Otomatik
+            let err = 'H'; // Yüksek Hata Düzeltme (Görsel bozulmasın diye)
             let qr = qrcode(type, err);
             qr.addData(url);
             qr.make();
             qrMatrix = qr;
 
-            // 2. Canvas Hazırla
+            // 2. Önizleme
+            let canvas = document.getElementById("qrCanvas");
             let container = document.getElementById("previewContainer");
-            container.innerHTML = "";
-            let canvas = document.createElement("canvas");
-            // Önizleme için makul bir boyut
-            canvas.width = 800;
-            canvas.height = 800; 
-            container.appendChild(canvas);
-
-            // 3. Çizimi Başlat
-            drawCanvas(canvas, 800, emoji);
             
-            // İndirme butonunu aç
-            document.getElementById("dlBtn").style.display = "block";
+            // Canvası çiz
+            drawQR(canvas, 1000, emoji); // Önizleme için 1000px yeterli
+            
+            container.style.display = "block";
+            document.getElementById("btnPdf").style.display = "block";
+            document.getElementById("btnImg").style.display = "block";
         }
 
-        function drawCanvas(canvas, size, emoji) {
+        function drawQR(canvas, size, emoji) {
             let ctx = canvas.getContext("2d");
+            canvas.width = size;
+            canvas.height = size;
+            
             let count = qrMatrix.getModuleCount();
-            let tileSize = size / count; // Her bir kareciğin boyutu
+            let tileSize = size / count;
 
-            // Temizle (Beyaz Arka Plan)
+            // Arka Plan Beyaz
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, size, size);
 
-            // Kömür Siyahı Efekti İçin Ayar
-            // Emojiler normalde renklidir. Canvas filtreleri ile siyah-beyaz yapıp karartacağız.
-            ctx.filter = "grayscale(100%) brightness(0%) contrast(200%)"; 
+            // Ayarları Al
+            let frameStyle = document.getElementById("frameStyle").value;
+            let dotStyle = document.getElementById("dotStyle").value;
+
+            // Kömür Siyahı Modu
+            ctx.fillStyle = "#000000"; 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // Font boyutunu karenin biraz fazlası yapalım ki dolgun dursun
-            ctx.font = `${tileSize * 1.0}px Arial`; 
-
-            let cornerStyle = document.getElementById("cornerStyle").value;
+            ctx.font = `${tileSize * 1.05}px Arial`; // Emoji boyutu
 
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
-                    // Bu nokta QR'ın parçası mı?
                     if (qrMatrix.isDark(r, c)) {
-                        
-                        // KÖŞE (FINDER PATTERN) KONTROLÜ
-                        // QR kodun 3 köşesindeki büyük gözleri tespit etmemiz lazım.
-                        // Sol Üst (0-7), Sağ Üst (count-7), Sol Alt (0-7)
+                        // Köşe Kontrolü (Finder Patterns)
+                        // 3 Köşedeki 7x7'lik alanları tespit et
                         let isFinder = false;
                         if ((r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7)) {
                             isFinder = true;
                         }
 
                         if (isFinder) {
-                            // Köşeleri ayrıca çizeceğiz, o yüzden döngüde atlıyoruz.
-                            // (Aşağıda drawFinders fonksiyonu çizecek)
+                            // Köşeleri burada çizmiyoruz, fonksiyonun sonunda toplu çizeceğiz
+                            // ki emojilerle karışmasın.
                         } else {
-                            // VERİ ALANI: Buraya Emoji basıyoruz!
+                            // Veri Alanı -> EMOJİ BAS (Siyah Filtreli)
+                            // Canvas filter kullanarak emojiyi simsiyah yapıyoruz
+                            ctx.save();
+                            ctx.filter = "grayscale(100%) brightness(0%)"; 
                             let x = c * tileSize + tileSize / 2;
-                            let y = r * tileSize + tileSize / 2 + (tileSize * 0.1); // Hafif aşağı ofset
+                            let y = r * tileSize + tileSize / 2 + (tileSize*0.1); 
                             ctx.fillText(emoji, x, y);
+                            ctx.restore();
                         }
                     }
                 }
             }
 
-            // Filtreyi kapat (Köşeleri net siyah çizeceğiz, emoji değil)
-            ctx.filter = "none";
-            drawFinders(ctx, size, count, cornerStyle);
+            // KÖŞELERİ ÇİZ (Frame ve Dot ayrı stillerde)
+            drawFinderPatterns(ctx, size, count, tileSize, frameStyle, dotStyle);
         }
 
-        // --- ÖZEL KÖŞE ÇİZİCİ (GÖZLER) ---
-        function drawFinders(ctx, totalSize, count, style) {
-            let tileSize = totalSize / count;
-            let finderSize = tileSize * 7; // Gözler her zaman 7x7 birimdir
-
-            // 3 Pozisyon: Sol-Üst, Sağ-Üst, Sol-Alt
-            let positions = [
-                [0, 0], 
-                [totalSize - finderSize, 0], 
-                [0, totalSize - finderSize]
+        function drawFinderPatterns(ctx, size, count, tileSize, frameStyle, dotStyle) {
+            let finderSize = tileSize * 7; // Göz boyutu 7 birimdir
+            // Pozisyonlar: Sol-Üst, Sağ-Üst, Sol-Alt
+            let pos = [
+                {x: 0, y: 0},
+                {x: size - finderSize, y: 0},
+                {x: 0, y: size - finderSize}
             ];
 
-            ctx.fillStyle = "#000000"; // Kömür Siyahı
+            ctx.fillStyle = "#000000"; // Siyah
 
-            positions.forEach(pos => {
-                let x = pos[0];
-                let y = pos[1];
-                let s = finderSize;
+            pos.forEach(p => {
+                // 1. DIŞ ÇERÇEVE (Frame)
+                drawShape(ctx, p.x, p.y, finderSize, frameStyle);
                 
-                // Dış Çerçeve
-                drawShape(ctx, x, y, s, style, true);
-                
-                // İçindeki Beyaz Boşluk (Frame kalınlığı genelde 1 birimdir)
+                // 2. ORTA BEYAZ BOŞLUK (Temizle)
+                ctx.save();
                 ctx.fillStyle = "#ffffff";
-                let innerGap = tileSize; 
-                drawShape(ctx, x + innerGap, y + innerGap, s - innerGap*2, style, false);
+                let gap = tileSize; // 1 birim kalınlık
+                drawShape(ctx, p.x + gap, p.y + gap, finderSize - gap*2, frameStyle); // İçini beyazlat
+                ctx.restore();
 
-                // En İçteki Siyah Nokta (3x3 birim)
-                ctx.fillStyle = "#000000";
-                let centerDot = tileSize * 2;
-                drawShape(ctx, x + centerDot, y + centerDot, s - centerDot*2, style, true);
+                // 3. İÇ NOKTA (Dot) - Ayrı stille
+                let dotSize = tileSize * 3; // Nokta 3 birimdir
+                let centerOffset = (finderSize - dotSize) / 2;
+                drawShape(ctx, p.x + centerOffset, p.y + centerOffset, dotSize, dotStyle);
             });
         }
 
-        // Şekil Çizim Mantığı
-        function drawShape(ctx, x, y, size, style, fill) {
+        // Geometrik Şekil Çizici
+        function drawShape(ctx, x, y, s, style) {
             ctx.beginPath();
-            
             if (style === "square") {
-                ctx.rect(x, y, size, size);
-            } 
-            else if (style === "circle") {
-                let r = size / 2;
+                ctx.rect(x, y, s, s);
+            } else if (style === "circle") {
+                let r = s / 2;
                 ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
-            } 
-            else if (style === "rounded") {
-                // Köşeleri yuvarlatılmış kare
-                let r = size * 0.2; // Yuvarlatma oranı
-                ctx.roundRect(x, y, size, size, r);
-            } 
-            else if (style === "leaf") {
-                // Yaprak efekti: İki köşe yuvarlak, iki köşe sivri
-                let r = size * 0.5;
-                ctx.moveTo(x, y); // Sol üst sivri
-                ctx.lineTo(x + size, y); 
-                ctx.arcTo(x + size, y + size, x, y + size, r); // Sağ alt yuvarlak
-                ctx.lineTo(x, y + size);
-                ctx.arcTo(x, y, x + size, y, r); // Sol alt yuvarlak
-                // Bu biraz basit yaprak oldu, CSS border-radius mantığı gibi:
-                // ctx.roundRect(x, y, size, size, [0, size/2, 0, size/2]); // Sadece modern tarayıcılarda çalışır
-                // Garanti yöntem:
-                ctx.roundRect(x, y, size, size, [size/2, 0, size/2, 0]); 
+            } else if (style === "rounded") {
+                ctx.roundRect(x, y, s, s, s * 0.25);
+            } else if (style === "leaf") {
+                ctx.roundRect(x, y, s, s, [s/2, 0, s/2, 0]);
+            } else if (style === "diamond") {
+                ctx.moveTo(x + s/2, y);
+                ctx.lineTo(x + s, y + s/2);
+                ctx.lineTo(x + s/2, y + s);
+                ctx.lineTo(x, y + s/2);
+                ctx.closePath();
             }
-            
             ctx.fill();
         }
 
-        // --- İNDİRME FONKSİYONU ---
+        // --- İNDİRME İŞLEMLERİ ---
+
+        // 1. PDF İNDİR (İstediğin gibi)
         function downloadPDF() {
-            let btn = document.getElementById("dlBtn");
+            let btn = document.getElementById("btnPdf");
             btn.innerText = "⏳ Hazırlanıyor...";
 
             setTimeout(() => {
-                // 1. Büyük Canvas Oluştur
-                let bigCanvas = document.createElement("canvas");
-                // PDF'in içine tam sığacak en yüksek kalite (yaklaşık 4000px)
-                let size = 2000; 
-                bigCanvas.width = size;
-                bigCanvas.height = size;
-                
-                let emoji = document.getElementById("emojiInput").value || "⬛";
-                drawCanvas(bigCanvas, size, emoji);
+                let canvas = document.createElement("canvas");
+                // Yüksek kalite çizim
+                drawQR(canvas, 2000, document.getElementById("emojiInput").value || "⬛");
+                let imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-                // 2. PDF Oluştur (40x30 cm Yatay)
                 const { jsPDF } = window.jspdf;
+                // Standart Kare PDF
                 const pdf = new jsPDF({
-                    orientation: "landscape",
-                    unit: "cm",
-                    format: [40, 30]
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: [200, 200] // 20cm x 20cm Kare PDF
                 });
 
-                // QR Kodu ortaya yerleştir (Kare olduğu için 30cm yüksekliğe sığdıracağız)
-                // 40cm genişlik var, 30cm yükseklik. Ortalamak için soldan 5cm boşluk bırakıyoruz.
-                let imgData = bigCanvas.toDataURL("image/jpeg", 1.0);
-                pdf.addImage(imgData, 'JPEG', 5, 0, 30, 30); // x=5, y=0, w=30, h=30
-
-                pdf.save("Emoji_QR_Mozaik.pdf");
-                btn.innerText = "💾 40x30cm PDF İNDİR";
+                pdf.addImage(imgData, 'JPEG', 0, 0, 200, 200);
+                pdf.save("QR_Tasarim.pdf");
+                
+                btn.innerText = "📄 PDF Olarak İndir";
             }, 100);
+        }
+
+        // 2. GALERİ İÇİN JPG İNDİR (Telefonda daha kolay açılır)
+        function downloadImage() {
+            let canvas = document.createElement("canvas");
+            drawQR(canvas, 2000, document.getElementById("emojiInput").value || "⬛");
+            
+            let link = document.createElement('a');
+            link.download = 'QR_Tasarim.jpg';
+            link.href = canvas.toDataURL("image/jpeg", 1.0);
+            link.click();
         }
     </script>
 </body>
