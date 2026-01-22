@@ -3,265 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanatsal İzi Oluşturucu</title>
+    <title>Akışkan Sanat QR - 40x30</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* Genel stil ayarları */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #eee;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
             margin: 0;
+            padding: 20px;
         }
-        /* Kontrol panelinin görünümü */
+
         .controls {
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 16px;
             width: 100%;
-            max-width: 450px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        /* Giriş alanları ve butonlar için genel stil */
-        .control-group {
+            max-width: 500px;
+            background: #111;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 10px;
             margin-bottom: 20px;
         }
-        .control-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #aaa;
-        }
-        .control-group input,
-        .control-group select,
-        .control-group button {
+
+        input, button, select {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background: #2d2d2d;
+            padding: 15px;
+            margin-top: 10px;
+            background: #222;
+            border: 1px solid #444;
             color: #fff;
-            font-size: 1rem;
+            font-size: 16px;
+            border-radius: 5px;
             box-sizing: border-box;
         }
-        /* Renk seçicinin görünümü */
-        input[type="color"] {
-            padding: 0;
-            height: 40px;
-            cursor: pointer;
-        }
-        /* Buton stilleri */
-        .btn-create {
-            background-color: #00c853;
-            color: white;
+
+        button {
+            background: #00ff99;
+            color: #000;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
+            text-transform: uppercase;
         }
-        .btn-create:hover {
-            background-color: #00e676;
+        
+        button#dlBtn {
+            background: #ff0055;
+            color: #fff;
+            display: none;
         }
-        .btn-download {
-            background-color: #ff4081;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.2s;
+
+        .preview-area {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
             display: none; /* Başlangıçta gizli */
         }
-        .btn-download:hover {
-            background-color: #f50057;
-        }
-        /* Önizleme alanı */
-        .preview-container {
-            padding: 10px;
-            background: white;
-            border-radius: 12px;
-            display: none; /* Başlangıçta gizli */
-        }
+
         canvas {
-            display: block;
             max-width: 100%;
             height: auto;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h2 style="text-align: center; color: #00c853;">🎨 Sanatsal İz Oluşturucu</h2>
+        <h2 style="margin-top:0; color:#00ff99;">🧪 SIVI/MÜREKKEP QR</h2>
         
-        <div class="control-group">
-            <label for="linkInput">🔗 Gömülecek Link:</label>
-            <input type="text" id="linkInput" placeholder="https://..." value="https://example.com">
-        </div>
+        <label>Hedef Link:</label>
+        <input type="text" id="linkInput" value="https://instagram.com" placeholder="https://...">
 
-        <div class="control-group">
-            <label for="colorInput">🎨 İz Rengi:</label>
-            <input type="color" id="colorInput" value="#000000">
-        </div>
+        <label>Leke Rengi:</label>
+        <input type="color" id="inkColor" value="#000000" style="height:50px;">
+        
+        <label>Yoğunluk:</label>
+        <select id="density">
+            <option value="low">Seyrek (Daha Sanatsal)</option>
+            <option value="high">Yoğun (Daha Güvenli)</option>
+        </select>
 
-        <div class="control-group">
-            <label for="styleInput">🌀 Tarz Seçin:</label>
-            <select id="styleInput">
-                <option value="fingerprint">Parmak İzi</option>
-                <option value="ink-splatter">Mürekkep Lekesi</option>
-            </select>
-        </div>
-
-        <button class="btn-create" onclick="generateArt()">✨ İzi Oluştur</button>
-        <button class="btn-download" id="dlBtn" onclick="downloadPDF()">💾 40x30cm PDF İndir (300 DPI)</button>
+        <button onclick="generateLiquidArt()">🔥 Sanatı Dök</button>
+        <button id="dlBtn" onclick="downloadPDF()">💾 40x30cm PDF İNDİR</button>
     </div>
 
-    <div class="preview-container" id="previewContainer">
-        <canvas id="previewCanvas"></canvas>
-    </div>
+    <div class="preview-area" id="previewBox">
+        </div>
 
     <script>
-        const PRINT_W = 4724; // 40cm @ 300 DPI
-        const PRINT_H = 3543; // 30cm @ 300 DPI
-        let uniqueID = '';
-        let currentStyle = 'fingerprint';
+        // 40cm x 30cm @ 300 DPI
+        const FULL_WIDTH = 4724; 
+        const FULL_HEIGHT = 3543;
+        
+        let currentQR = null;
+        let uniqueCode = "";
 
-        function generateArt() {
-            const link = document.getElementById('linkInput').value;
-            if (!link) {
-                alert("Lütfen bir link girin.");
-                return;
-            }
+        function generateLiquidArt() {
+            let url = document.getElementById("linkInput").value;
+            if(!url) return alert("Link gir!");
 
-            uniqueID = Date.now().toString(36);
-            currentStyle = document.getElementById('styleInput').value;
+            // 1. UNIQUE ID EKLE (Her seferinde farklı desen için)
+            uniqueCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            let finalUrl = url.includes("?") ? `${url}&id=${uniqueCode}` : `${url}?id=${uniqueCode}`;
+
+            // 2. QR DATASINI HESAPLA
+            // TypeNumber: 0 (Otomatik), Correction: H (Yüksek - Leke olsa da okunur)
+            let typeNumber = 0;
+            let errorCorrectionLevel = 'H';
+            let qr = qrcode(typeNumber, errorCorrectionLevel);
+            qr.addData(finalUrl);
+            qr.make();
+            currentQR = qr;
+
+            // 3. ÖNİZLEME ÇİZ
+            let previewContainer = document.getElementById("previewBox");
+            previewContainer.innerHTML = ""; // Temizle
             
-            const previewCanvas = document.getElementById('previewCanvas');
-            const previewContainer = document.getElementById('previewContainer');
-            const dlBtn = document.getElementById('dlBtn');
+            let canvas = document.createElement("canvas");
+            canvas.id = "artCanvas";
+            previewContainer.style.display = "block";
+            previewContainer.appendChild(canvas);
 
-            // Önizleme için canvas boyutunu ayarla
-            previewCanvas.width = 800;
-            previewCanvas.height = 600;
-
-            // Seçilen stile göre çizim yap
-            if (currentStyle === 'fingerprint') {
-                drawFingerprint(previewCanvas, 800, 600, uniqueID);
-            } else {
-                drawInkSplatter(previewCanvas, 800, 600, uniqueID);
-            }
-
-            previewContainer.style.display = 'block';
-            dlBtn.style.display = 'block';
+            // Önizleme boyutu (Küçük)
+            drawArt(canvas, 800, 600);
+            
+            // İndirme butonunu aç
+            let dlBtn = document.getElementById("dlBtn");
+            dlBtn.style.display = "block";
+            dlBtn.innerText = `💾 40x30cm PDF İNDİR (${uniqueCode})`;
         }
 
-        // Parmak izi çizim fonksiyonu
-        function drawFingerprint(canvas, width, height, seed) {
-            const ctx = canvas.getContext('2d');
-            const color = document.getElementById('colorInput').value;
+        function drawArt(canvas, width, height) {
+            let ctx = canvas.getContext("2d");
+            canvas.width = width;
+            canvas.height = height;
 
-            ctx.fillStyle = '#ffffff';
+            // Arka plan BEYAZ (Kontrast için şart)
+            ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, width, height);
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width / 150;
-            ctx.lineCap = 'round';
-
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const maxRadius = Math.min(width, height) * 0.4;
-            const numRings = 25;
-
-            // Rastgelelik için seed'i kullan
-            let rng = new Math.seedrandom(seed);
-
-            for (let i = 1; i <= numRings; i++) {
-                const radius = (i / numRings) * maxRadius;
-                const startAngle = rng() * Math.PI * 2;
-                const endAngle = startAngle + (Math.PI * 1.5) + (rng() * Math.PI * 0.5);
-                const counterclockwise = rng() > 0.5;
-
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, startAngle, endAngle, counterclockwise);
-                ctx.stroke();
-
-                // Rastgele küçük kesintiler ve sapmalar ekle
-                if (rng() > 0.7) {
-                    const breakAngle = startAngle + (rng() * (endAngle - startAngle));
-                    const breakX = centerX + Math.cos(breakAngle) * radius;
-                    const breakY = centerY + Math.sin(breakAngle) * radius;
-                    ctx.clearRect(breakX - 2, breakY - 2, 4, 4);
-                }
-            }
-        }
-
-        // Mürekkep lekesi çizim fonksiyonu
-        function drawInkSplatter(canvas, width, height, seed) {
-            const ctx = canvas.getContext('2d');
-            const color = document.getElementById('colorInput').value;
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, width, height);
+            let moduleCount = currentQR.getModuleCount();
+            let color = document.getElementById("inkColor").value;
+            
+            // QR Kodun yerleşimi (Ortada %70 yer kaplasın)
+            let size = Math.min(width, height) * 0.7;
+            let startX = (width - size) / 2;
+            let startY = (height - size) / 2;
+            let tileSize = size / moduleCount;
 
             ctx.fillStyle = color;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const numDrops = 50;
-            let rng = new Math.seedrandom(seed);
 
-            for (let i = 0; i < numDrops; i++) {
-                const angle = rng() * Math.PI * 2;
-                const distance = rng() * Math.min(width, height) * 0.4;
-                const x = centerX + Math.cos(angle) * distance;
-                const y = centerY + Math.sin(angle) * distance;
-                const radius = (rng() * width / 20) * (1 - distance / (Math.min(width, height) * 0.4));
-
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fill();
+            for (let r = 0; r < moduleCount; r++) {
+                for (let c = 0; c < moduleCount; c++) {
+                    if (currentQR.isDark(r, c)) {
+                        let x = startX + c * tileSize;
+                        let y = startY + r * tileSize;
+                        
+                        // BURASI SİHİRİN OLDUĞU YER:
+                        // Kare çizmek yerine "Akışkan Leke" fonksiyonunu çağırıyoruz.
+                        drawLiquidDrop(ctx, x, y, tileSize);
+                    }
+                }
             }
+            
+            // Altına Kod Yazısı
+            ctx.fillStyle = "#ccc";
+            ctx.font = "12px monospace";
+            ctx.fillText(uniqueCode, 10, height - 10);
+        }
+
+        function drawLiquidDrop(ctx, x, y, size) {
+            // Rastgele şekil parametreleri
+            let cx = x + size / 2;
+            let cy = y + size / 2;
+            let radius = (size / 2) * 1.3; // Biraz taşsın ki birleşsinler (Mürekkep etkisi)
+
+            ctx.beginPath();
+            
+            // Basit bir daire yerine bozuk bir çokgen çiziyoruz (Leke efekti)
+            // Nokta sayısını ve açıyı rastgele değiştirerek organiklik katıyoruz
+            let points = 6 + Math.floor(Math.random() * 4); // 6-10 arası köşe
+            
+            for (let i = 0; i <= points; i++) {
+                let angle = (i / points) * Math.PI * 2;
+                // Yarıçapı rastgele daraltıp genişletiyoruz (%80 ile %120 arası)
+                let r = radius * (0.8 + Math.random() * 0.4); 
+                let px = cx + Math.cos(angle) * r;
+                let py = cy + Math.sin(angle) * r;
+                
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            
+            ctx.closePath();
+            ctx.fill();
         }
 
         async function downloadPDF() {
-            const dlBtn = document.getElementById('dlBtn');
-            dlBtn.innerText = "⏳ PDF Hazırlanıyor...";
-            dlBtn.disabled = true;
-
-            const highResCanvas = document.createElement('canvas');
-            highResCanvas.width = PRINT_W;
-            highResCanvas.height = PRINT_H;
-
-            if (currentStyle === 'fingerprint') {
-                drawFingerprint(highResCanvas, PRINT_W, PRINT_H, uniqueID);
-            } else {
-                drawInkSplatter(highResCanvas, PRINT_W, PRINT_H, uniqueID);
-            }
-
-            const imgData = highResCanvas.toDataURL('image/png', 1.0);
-
-            const { jsPDF } = window.jspdf;
-            // 400mm x 300mm boyutunda PDF oluştur
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: [400, 300]
-            });
-
-            // Görüntüyü PDF'e ekle
-            pdf.addImage(imgData, 'PNG', 0, 0, 400, 300);
+            let btn = document.getElementById("dlBtn");
+            btn.innerText = "⏳ HAZIRLANIYOR...";
             
-            // PDF'i indir
-            pdf.save(`Sanatsal_Iz_${uniqueID}.pdf`);
+            setTimeout(() => {
+                // 1. Yüksek Çözünürlüklü Canvas Oluştur
+                let bigCanvas = document.createElement("canvas");
+                drawArt(bigCanvas, FULL_WIDTH, FULL_HEIGHT);
+                
+                // 2. PDF'e Çevir
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: "landscape",
+                    unit: "mm",
+                    format: [400, 300] // 40cm x 30cm
+                });
 
-            dlBtn.innerText = "💾 40x30cm PDF İndir (300 DPI)";
-            dlBtn.disabled = false;
+                let imgData = bigCanvas.toDataURL("image/jpeg", 1.0);
+                pdf.addImage(imgData, 'JPEG', 0, 0, 400, 300);
+                pdf.save(`Murekkep_QR_${uniqueCode}.pdf`);
+                
+                btn.innerText = "✅ İNDİRİLDİ";
+                setTimeout(() => btn.innerText = `💾 40x30cm PDF İNDİR`, 2000);
+            }, 100);
         }
-
-        // Rastgele sayı üreteci için kütüphane (harici script olarak eklenmeli)
-        (function(a,b,c,d,e,f){a.Math.seedrandom=function(g,h,i){return h=h||{},h.a=h.a||1103515245,h.c=h.c||12345,i=i||a.Math.random,g=g||i(),function(){return g=g*h.a+h.c&2147483647}}})(window);
     </script>
 </body>
 </html>
