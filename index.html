@@ -3,106 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>40x30 Özel Baskı QR - V4 (Garanti Mod)</title>
+    <title>42x32 Kağıt Üzerine 40x30 Baskı</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #121212;
+            background-color: #1a1a1a;
             color: #eee;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0;
             padding: 20px;
         }
 
         .panel {
-            background: #1e1e1e;
+            background: #2b2b2b;
             padding: 25px;
-            border-radius: 16px;
+            border-radius: 15px;
             width: 100%;
-            max-width: 480px;
-            border: 1px solid #333;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-
-        h2 { text-align: center; color: #00e676; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
-        .res-info { text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 20px; font-family: monospace; }
-
-        label { display: block; margin-top: 15px; font-weight: bold; color: #aaa; font-size: 0.9rem;}
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            background: #2d2d2d;
+            max-width: 500px;
             border: 1px solid #444;
-            color: #fff;
-            border-radius: 8px;
-            margin-top: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        input[type="color"] { height: 50px; padding: 2px; cursor: pointer; }
-        /* Emoji girişi için özel font ayarı - Telefondaki görünümü iyileştirir */
-        #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+        h2 { text-align: center; color: #00d2ff; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
+        .dims { text-align: center; color: #aaa; font-size: 0.85rem; margin-bottom: 20px; font-family: monospace; border-bottom: 1px solid #444; padding-bottom: 10px;}
+
+        label { display: block; margin-top: 15px; font-weight: bold; color: #ccc; font-size: 0.9rem;}
+        input, select {
+            width: 100%; padding: 12px; background: #383838; border: 1px solid #555;
+            color: #fff; border-radius: 6px; margin-top: 5px; font-size: 16px; box-sizing: border-box;
+        }
+        input[type="color"] { height: 50px; padding: 2px; }
+        #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; }
 
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
 
         button {
-            width: 100%;
-            padding: 18px;
-            margin-top: 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.2s;
+            width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
-
-        .btn-gen { background: #00e676; color: #000; }
-        .btn-dl { background: #ff4081; color: #fff; display: none; }
-        
-        button:active { transform: scale(0.98); }
+        .btn-gen { background: #00d2ff; color: #000; }
+        .btn-gen:hover { background: #33e0ff; }
+        .btn-dl { background: #ff0055; color: #fff; display: none; }
+        .btn-dl:hover { background: #ff3377; }
 
         #previewContainer {
-            margin-top: 20px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-            text-align: center;
+            margin-top: 20px; background: #fff; padding: 10px;
+            border-radius: 4px; display: none; text-align: center;
+            border: 2px solid #00d2ff; /* Önizlemede sınırları görmek için */
         }
-        
-        canvas { 
-            max-width: 100%; 
-            height: auto; 
-            border: 1px solid #ddd;
-            display: block;
-        }
+        canvas { max-width: 100%; height: auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
     <div class="panel">
-        <h2>🖨️ 40x30 Baskı Motoru V4</h2>
-        <div class="res-info">Çıktı Boyutu: 3780 x 2835 px (Garanti Mod)</div>
+        <h2>PASPARTU MODU</h2>
+        <div class="dims">
+            Sayfa: 42cm x 32cm<br>
+            Baskı Alanı: 40cm x 30cm<br>
+            (Kenarlardan 1'er cm Pay)
+        </div>
         
         <label>🔗 Hedef Link:</label>
         <input type="text" id="url" value="https://instagram.com" placeholder="https://...">
 
         <div class="row">
             <div class="col">
-                <label>😀 Desen (Emoji):</label>
-                <input type="text" id="emoji" value="🦁" placeholder="Emoji">
+                <label>😀 Emoji:</label>
+                <input type="text" id="emoji" value="🦁">
             </div>
             <div class="col">
                 <label>🎨 Renk:</label>
-                <input type="color" id="color" value="#ff0000">
+                <input type="color" id="color" value="#000000">
             </div>
         </div>
 
@@ -110,117 +85,136 @@
             <div class="col">
                 <label>🔲 Çerçeve:</label>
                 <select id="frame">
-                    <option value="rounded">Yumuşak</option>
                     <option value="square">Kare</option>
+                    <option value="rounded">Yumuşak</option>
                     <option value="leaf">Yaprak</option>
                     <option value="circle">Yuvarlak</option>
                 </select>
             </div>
             <div class="col">
-                <label>⚫ İç Nokta:</label>
+                <label>⚫ Nokta:</label>
                 <select id="dot">
-                    <option value="circle">Yuvarlak</option>
                     <option value="square">Kare</option>
+                    <option value="circle">Yuvarlak</option>
                     <option value="diamond">Elmas</option>
                 </select>
             </div>
         </div>
 
-        <button class="btn-gen" onclick="prepareAndPreview()">✨ Tasarımı Hazırla</button>
+        <button class="btn-gen" onclick="preparePreview()">✨ Önizle</button>
         
         <div id="previewContainer">
             <canvas id="previewCanvas"></canvas>
-            <div style="color:#555; font-size:12px; margin-top:5px;">Önizleme Modu</div>
+            <div style="color:#333; font-size:11px; margin-top:5px;">Beyaz alan 42x32cm kağıdı temsil eder.</div>
         </div>
 
-        <button class="btn-dl" id="dlBtn" onclick="downloadFullRes()">💾 3780x2835 JPEG İNDİR</button>
+        <button class="btn-dl" id="dlBtn" onclick="downloadPrintReady()">💾 42x32cm JPEG İNDİR</button>
     </div>
 
     <script>
-        // --- ÖLÇÜLER (DEĞİŞMEDİ) ---
-        const TARGET_W = 3780; // 40 cm
-        const TARGET_H = 2835; // 30 cm
-        const MARGIN_PX = 25; // ~2mm boşluk
+        // --- HESAPLAMA MERKEZİ ---
+        // 300 DPI Standartında Piksel Hesabı
+        // 1 cm = 118.11 px
+        const DPI_MULT = 118.11;
+
+        // 1. KAĞIT BOYUTU (42cm x 32cm)
+        const PAGE_W_CM = 42;
+        const PAGE_H_CM = 32;
+        const PAGE_W_PX = Math.round(PAGE_W_CM * DPI_MULT); // ~4961 px
+        const PAGE_H_PX = Math.round(PAGE_H_CM * DPI_MULT); // ~3780 px
+
+        // 2. İÇERİK ALANI (40cm x 30cm)
+        const CONTENT_W_CM = 40;
+        const CONTENT_H_CM = 30;
+        const CONTENT_W_PX = Math.round(CONTENT_W_CM * DPI_MULT);
+        const CONTENT_H_PX = Math.round(CONTENT_H_CM * DPI_MULT);
+
+        // 3. KENAR BOŞLUKLARI (Otomatik ortalama için)
+        // (Sayfa - İçerik) / 2
+        const MARGIN_X = (PAGE_W_PX - CONTENT_W_PX) / 2;
+        const MARGIN_Y = (PAGE_H_PX - CONTENT_H_PX) / 2;
 
         let qrData = null;
-        // tintedEmoji değişkenini kaldırdık, artık gerek yok.
 
-        function prepareAndPreview() {
+        function preparePreview() {
             let url = document.getElementById("url").value;
-            if(!url) return alert("Lütfen bir link girin!");
+            if(!url) return alert("Link gir!");
 
-            // 1. QR Verisini Hesapla
             let qr = qrcode(0, 'H');
             qr.addData(url);
             qr.make();
             qrData = qr;
 
-            // 2. Emojiyi Boyama kısmını kaldırdık. Direkt çizime geçiyoruz.
-            
-            // Önizleme için küçük boyut
-            let previewW = 800;
-            let previewH = 600; // 4:3 oranı koru
+            // Önizleme için küçültülmüş boyutlar
+            let previewScale = 0.2; // %20 boyutunda göster
             let canvas = document.getElementById("previewCanvas");
             
-            // Önizleme Çizimi
-            drawArt(canvas, previewW, previewH);
+            drawArt(canvas, PAGE_W_PX * previewScale, PAGE_H_PX * previewScale, true);
             
             document.getElementById("previewContainer").style.display = "block";
             document.getElementById("dlBtn").style.display = "block";
         }
 
-        // --- ANA ÇİZİM MOTORU (YENİLENDİ - BASİTLEŞTİRİLDİ) ---
-        function drawArt(canvas, w, h) {
+        // --- ÇİZİM MOTORU ---
+        // isPreview: True ise önizleme boyutunda çizer, False ise tam boyut
+        function drawArt(canvas, w, h, isPreview) {
             let ctx = canvas.getContext("2d");
             canvas.width = w;
             canvas.height = h;
 
-            // 1. Arka Plan Beyaz
+            // Ölçekleme Çarpanı (Önizleme ile Gerçek Boyut arasındaki oran)
+            let scale = w / PAGE_W_PX;
+
+            // 1. ZEMİN (42x32 BEYAZ KAĞIT)
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
-            // 2. Ölçekleme ve Yerleşim Hesabı
-            let scaleY = h / TARGET_H;
-            let availableH = TARGET_H - (MARGIN_PX * 2);
-            let qrSizeOriginal = availableH; 
-            let qrSize = qrSizeOriginal * scaleY; 
+            // 2. BASKI ALANI HESABI
+            // İçeriğimiz 40x30 ama QR karemiz 30x30 olmalı (Simetri için)
+            // Çünkü 30cm yükseklik sınırımız var. 40cm genişliğe yayarsak bozulur.
+            // Bu yüzden 40x30 alanın tam ortasına 30x30 QR koyacağız.
             
-            let startX = (w - qrSize) / 2;
-            let startY = (MARGIN_PX * scaleY); 
+            // Gerçek piksel değerlerini o anki ölçeğe uyarla
+            let safeAreaX = MARGIN_X * scale;
+            let safeAreaY = MARGIN_Y * scale;
+            let safeAreaW = CONTENT_W_PX * scale; // 40cm'nin piksel karşılığı
+            let safeAreaH = CONTENT_H_PX * scale; // 30cm'nin piksel karşılığı
+
+            // QR Kare Boyutu = Yükseklik (30cm)
+            let qrSize = safeAreaH; 
+
+            // QR'ı 40cm'lik alanın ortasına hizala
+            // Başlangıç X = (Sol Boşluk) + (40cm genişlik - 30cm QR) / 2
+            let qrX = safeAreaX + (safeAreaW - qrSize) / 2;
+            let qrY = safeAreaY; // Üstten zaten 1cm boşluk var
 
             let count = qrData.getModuleCount();
             let tileSize = qrSize / count;
             let mainColor = document.getElementById("color").value;
             let emojiChar = document.getElementById("emoji").value || "⬛";
 
-            // 3. EMOJİLERİ BAS (YENİ YÖNTEM: DOĞRUDAN YAZI OLARAK)
-            ctx.fillStyle = mainColor; // Rengi ayarla
+            // 3. EMOJİLERİ ÇİZ
+            ctx.fillStyle = mainColor;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // Font boyutunu karenin %90'ı yapalım ki taşmasın
-            ctx.font = `${tileSize * 0.9}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+            ctx.font = `${tileSize * 0.9}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
 
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
-                        if (isFinder(r, c, count)) continue; // Köşeleri atla
+                        if (isFinder(r, c, count)) continue;
 
-                        // Merkeze konumlandır
-                        let x = startX + c * tileSize + tileSize / 2;
-                        let y = startY + r * tileSize + tileSize / 2;
-                        
-                        // ESKİ YÖNTEM (Resim çizme): ctx.drawImage(...) - ÇÖP
-                        // YENİ YÖNTEM (Yazı yazma): - GARANTİ
+                        let x = qrX + c * tileSize + tileSize / 2;
+                        let y = qrY + r * tileSize + tileSize / 2;
                         ctx.fillText(emojiChar, x, y);
                     }
                 }
             }
 
-            // 4. Köşeleri Çiz (Bu kısım aynı)
-            drawFinders(ctx, startX, startY, qrSize, count, tileSize, mainColor);
+            // 4. KÖŞELERİ ÇİZ
+            drawFinders(ctx, qrX, qrY, qrSize, count, tileSize, mainColor);
         }
 
-        // --- YARDIMCI FONKSİYONLAR ---
         function isFinder(r, c, count) {
             return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
         }
@@ -239,15 +233,12 @@
             ctx.fillStyle = color;
 
             pos.forEach(p => {
-                // Dış
                 drawShape(ctx, p.x, p.y, finderSize, frameStyle);
-                // Orta Beyaz
                 ctx.save();
                 ctx.fillStyle = "#fff";
                 let gap = tileSize;
                 drawShape(ctx, p.x + gap, p.y + gap, finderSize - gap*2, frameStyle);
                 ctx.restore();
-                // İç Nokta
                 let dotS = tileSize * 3;
                 let off = (finderSize - dotS) / 2;
                 drawShape(ctx, p.x + off, p.y + off, dotS, dotStyle);
@@ -261,33 +252,30 @@
             else if (style === "rounded") ctx.roundRect(x, y, s, s, s*0.25);
             else if (style === "leaf") ctx.roundRect(x, y, s, s, [s/2, 0, s/2, 0]);
             else if (style === "diamond") {
-                ctx.moveTo(x + s/2, y);
-                ctx.lineTo(x + s, y + s/2);
-                ctx.lineTo(x + s/2, y + s);
-                ctx.lineTo(x, y + s/2);
+                ctx.moveTo(x + s/2, y); ctx.lineTo(x + s, y + s/2);
+                ctx.lineTo(x + s/2, y + s); ctx.lineTo(x, y + s/2);
             }
             ctx.fill();
         }
 
-        // --- FULL BOYUT İNDİRME ---
-        function downloadFullRes() {
+        // --- TAM BOYUT İNDİRME ---
+        function downloadPrintReady() {
             let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ 3780px İŞLENİYOR...";
+            btn.innerText = "⏳ 4961x3780px İŞLENİYOR...";
             
             setTimeout(() => {
                 let bigCanvas = document.createElement("canvas");
-                // TAM BOYUT ÇİZİM!
-                drawArt(bigCanvas, TARGET_W, TARGET_H);
+                // GERÇEK BOYUTLARDA ÇİZ (42cm x 32cm @ 300DPI)
+                drawArt(bigCanvas, PAGE_W_PX, PAGE_H_PX, false);
                 
                 let link = document.createElement('a');
-                link.download = `Baski_40x30_${Date.now()}.jpg`;
-                // Kaliteyi %95'e çektim, dosya boyutu aşırı şişmesin ama kalite düşmesin
-                link.href = bigCanvas.toDataURL("image/jpeg", 0.95); 
+                link.download = `Baski_42x32_${Date.now()}.jpg`;
+                link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
                 link.click();
 
                 btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerText = "💾 3780x2835 JPEG İNDİR", 3000);
-            }, 200);
+                setTimeout(() => btn.innerText = "💾 42x32cm JPEG İNDİR", 3000);
+            }, 500);
         }
     </script>
 </body>
