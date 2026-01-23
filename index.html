@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eşsiz Paspartu QR (Her Seferinde Farklı)</title>
+    <title>Pro Görsel QR (Arka Planlı)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #1a1a1a;
+            background-color: #121212; /* Koyu mod */
             color: #eee;
             display: flex;
             flex-direction: column;
@@ -17,28 +17,30 @@
         }
 
         .panel {
-            background: #252525;
+            background: #1e1e1e;
             padding: 25px;
             border-radius: 15px;
             width: 100%;
             max-width: 500px;
-            border: 1px solid #444;
+            border: 1px solid #333;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        h2 { text-align: center; color: #ff0055; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
-        .dims { 
-            background: #333; padding: 10px; border-radius: 8px;
-            text-align: center; color: #fff; font-size: 0.9rem; margin-bottom: 20px; font-family: monospace; 
-            border: 1px dashed #555;
+        h2 { text-align: center; color: #FFD700; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
+        
+        /* Yeni input stilleri */
+        .file-upload {
+            border: 2px dashed #555; padding: 15px; text-align: center; margin-top: 15px; border-radius: 8px; cursor: pointer;
         }
+        input[type="file"] { display: none; }
+        input[type="range"] { width: 100%; margin-top: 5px; accent-color: #FFD700; }
 
         label { display: block; margin-top: 15px; font-weight: bold; color: #ccc; font-size: 0.9rem;}
-        input, select {
-            width: 100%; padding: 12px; background: #383838; border: 1px solid #555;
+        input[type="text"], select {
+            width: 100%; padding: 12px; background: #333; border: 1px solid #555;
             color: #fff; border-radius: 6px; margin-top: 5px; font-size: 16px; box-sizing: border-box;
         }
-        input[type="color"] { height: 50px; padding: 2px; }
+        input[type="color"] { height: 50px; width:100%; padding: 2px; border:none; }
         #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; }
 
         .row { display: flex; gap: 10px; }
@@ -48,138 +50,142 @@
             width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 8px;
             font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
-        .btn-gen { background: #ff0055; color: #fff; }
-        .btn-gen:hover { background: #ff3377; }
-        .btn-dl { background: #00e676; color: #000; display: none; }
+        .btn-gen { background: #FFD700; color: #000; }
+        .btn-gen:hover { background: #ffea70; }
+        .btn-dl { background: #ff0055; color: #fff; display: none; }
 
         #previewContainer {
-            margin-top: 20px; background: #fff; padding: 15px;
+            margin-top: 20px; background: #fff; padding: 10px;
             border-radius: 4px; display: none; text-align: center;
-            border: 1px solid #ccc;
         }
         canvas { max-width: 100%; height: auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .uuid-display { font-size: 10px; color: #666; margin-top: 5px; font-family: monospace; }
     </style>
 </head>
 <body>
 
     <div class="panel">
-        <h2>EŞSİZ QR MOTORU</h2>
-        <div class="dims">
-            📄 KAĞIT: 42cm x 32cm<br>
-            🖨️ BASKI: 40cm x 30cm<br>
-            🔒 Her Tıklamada Yeni Desen
-        </div>
+        <h2>PRO GÖRSEL QR</h2>
+        <div style="text-align:center; font-size:0.8rem; color:#aaa;">42x32 Kağıt / 40x30 Baskı / Arka Planlı</div>
         
         <label>🔗 Hedef Link:</label>
-        <input type="text" id="url" value="https://instagram.com" placeholder="https://...">
+        <input type="text" id="url" value="https://instagram.com">
+
+        <label>🖼️ Arka Plan Resmi (İsteğe Bağlı):</label>
+        <div class="file-upload" onclick="document.getElementById('bgInput').click()">
+            Resim Seçmek İçin Tıkla
+        </div>
+        <input type="file" id="bgInput" accept="image/*" onchange="handleImageUpload(event)">
+        
+        <label>Arka Plan Opaklığı: <span id="opacityVal">50%</span></label>
+        <input type="range" id="bgOpacity" min="0" max="100" value="50" oninput="document.getElementById('opacityVal').innerText = this.value + '%'">
 
         <div class="row">
             <div class="col">
                 <label>😀 Emoji:</label>
-                <input type="text" id="emoji" value="🦁">
+                <input type="text" id="emoji" value="⬛">
             </div>
             <div class="col">
-                <label>🎨 Renk:</label>
+                <label>🎨 Emoji Rengi:</label>
                 <input type="color" id="color" value="#000000">
             </div>
         </div>
 
         <div class="row">
             <div class="col">
-                <label>🔲 Çerçeve:</label>
+                <label>🔲 Köşe Stili:</label>
                 <select id="frame">
                     <option value="square">Kare</option>
                     <option value="rounded">Yumuşak</option>
-                    <option value="leaf">Yaprak</option>
                     <option value="circle">Yuvarlak</option>
                 </select>
             </div>
             <div class="col">
-                <label>⚫ Nokta:</label>
+                <label>⚫ Nokta Stili:</label>
                 <select id="dot">
                     <option value="square">Kare</option>
                     <option value="circle">Yuvarlak</option>
-                    <option value="diamond">Elmas</option>
                 </select>
             </div>
         </div>
 
-        <button class="btn-gen" onclick="preparePreview()">🎲 Eşsiz Desen Üret</button>
+        <button class="btn-gen" onclick="preparePreview()">✨ Tasarımı Birleştir</button>
         
         <div id="previewContainer">
             <canvas id="previewCanvas"></canvas>
-            <div class="uuid-display" id="uuidText"></div>
-            <div style="color:#333; font-size:11px; margin-top:5px;">Beyaz alanın tamamı 42x32cm kağıttır.</div>
         </div>
 
         <button class="btn-dl" id="dlBtn" onclick="downloadFinal()">💾 42x32cm JPEG İNDİR</button>
     </div>
 
     <script>
-        // --- BOYUT HESAPLARI (300 DPI) ---
         const DPI = 118.11;
-        const PAGE_W = Math.round(42 * DPI); // 42cm
-        const PAGE_H = Math.round(32 * DPI); // 32cm
-        const PRINT_W = Math.round(40 * DPI); // 40cm
-        const PRINT_H = Math.round(30 * DPI); // 30cm
-
-        // Kenar Boşlukları
+        const PAGE_W = Math.round(42 * DPI);
+        const PAGE_H = Math.round(32 * DPI);
+        const PRINT_W = Math.round(40 * DPI);
+        const PRINT_H = Math.round(30 * DPI);
         const MARGIN_X = (PAGE_W - PRINT_W) / 2;
         const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
 
         let qrData = null;
-        let currentUUID = "";
+        let bgImage = null; // Yüklenen resmi tutacak değişken
+
+        // Resim yükleme işleyicisi
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    bgImage = new Image();
+                    bgImage.onload = function() {
+                        alert("Resim yüklendi! Şimdi 'Tasarımı Birleştir'e bas.");
+                    }
+                    bgImage.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
         function preparePreview() {
-            let baseUrl = document.getElementById("url").value;
-            if(!baseUrl) return alert("Link gir!");
+            let url = document.getElementById("url").value;
+            if(!url) return alert("Link gir!");
 
-            // --- İŞTE SİHİR BURADA: UNIQUE ID ---
-            // Her tıklamada rastgele bir kod üretip linke ekliyoruz.
-            // Bu sayede QR deseni sonsuza kadar değişiyor.
-            let randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-            let timestamp = Date.now().toString().slice(-4);
-            currentUUID = `ID-${randomPart}${timestamp}`;
-            
-            // Linkin sonuna ?uid=... veya &uid=... ekle
-            let finalUrl = baseUrl.includes("?") 
-                ? `${baseUrl}&uuid=${currentUUID}` 
-                : `${baseUrl}?uuid=${currentUUID}`;
+            // Her seferinde farklı desen için UID
+            let finalUrl = `${url}?uid=${Date.now()}`;
 
             let qr = qrcode(0, 'H');
             qr.addData(finalUrl);
             qr.make();
             qrData = qr;
 
-            // Önizleme Çiz
             let previewScale = 0.15;
             let canvas = document.getElementById("previewCanvas");
             drawArt(canvas, PAGE_W * previewScale, PAGE_H * previewScale, true);
             
-            // Bilgi metnini güncelle
-            document.getElementById("uuidText").innerText = `Kilitlenen Benzersiz Kod: ${currentUUID}`;
             document.getElementById("previewContainer").style.display = "block";
-            
-            // İndirme butonunu güncelle (İçinde kod yazsın)
-            let dlBtn = document.getElementById("dlBtn");
-            dlBtn.style.display = "block";
-            dlBtn.innerHTML = `💾 İNDİR (${currentUUID})`;
+            document.getElementById("dlBtn").style.display = "block";
         }
 
-        // --- ÇİZİM MOTORU (AYNI KALDI) ---
         function drawArt(canvas, w, h, isPreview) {
             let ctx = canvas.getContext("2d");
             canvas.width = w;
             canvas.height = h;
-
             let scale = w / PAGE_W;
 
-            // 1. ZEMİN (42x32)
+            // 1. ZEMİN (BEYAZ)
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
-            // 2. BASKI ALANI (40x30)
+            // 2. ARKA PLAN RESMİ (Varsa çiz)
+            if (bgImage) {
+                ctx.save();
+                // Opaklık ayarını uygula (0.0 - 1.0 arası)
+                ctx.globalAlpha = document.getElementById("bgOpacity").value / 100;
+                // Resmi tüm kağıda yay
+                ctx.drawImage(bgImage, 0, 0, w, h);
+                ctx.restore();
+            }
+
+            // 3. QR KODU ÇİZ (Baskı alanına)
             let drawX = MARGIN_X * scale;
             let drawY = MARGIN_Y * scale;
             let drawW = PRINT_W * scale;
@@ -197,6 +203,7 @@
             ctx.textBaseline = "middle";
             ctx.font = `${tileH * 0.9}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
 
+            // Emojiler (Veri)
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
@@ -208,7 +215,13 @@
                 }
             }
 
+            // 3 Ana Köşeyi Çiz
             drawFinders(ctx, drawX, drawY, tileW, tileH, count, mainColor);
+            
+            // --- YENİ ÖZELLİK: SAĞ ALT KÖŞE HİLESİ ---
+            // Gönderdiğin örneklerdeki gibi görünsün diye sağ alta 4. bir köşe ekliyoruz.
+            // Bu köşe sahtedir, sadece görsel amaçlıdır.
+            drawExtraCorner(ctx, drawX, drawY, tileW, tileH, count, mainColor);
         }
 
         function isFinder(r, c, count) {
@@ -216,39 +229,49 @@
         }
 
         function drawFinders(ctx, startX, startY, tileW, tileH, count, color) {
+            let pos = [
+                {x: startX, y: startY}, // Sol-Üst
+                {x: startX + (count - 7) * tileW, y: startY}, // Sağ-Üst
+                {x: startX, y: startY + (count - 7) * tileH}  // Sol-Alt
+            ];
+            drawCornerShapes(ctx, pos, tileW, tileH, color);
+        }
+
+        // Sağ alt köşe için ek fonksiyon
+        function drawExtraCorner(ctx, startX, startY, tileW, tileH, count, color) {
+             let pos = [
+                {x: startX + (count - 7) * tileW, y: startY + (count - 7) * tileH} // Sağ-Alt (Yeni!)
+            ];
+            drawCornerShapes(ctx, pos, tileW, tileH, color);
+        }
+
+        // Köşe şekillerini çizen ortak fonksiyon
+        function drawCornerShapes(ctx, positions, tileW, tileH, color) {
             let finderW = tileW * 7;
             let finderH = tileH * 7;
-
-            let pos = [
-                {x: startX, y: startY}, 
-                {x: startX + (count - 7) * tileW, y: startY}, 
-                {x: startX, y: startY + (count - 7) * tileH}  
-            ];
-
             let frameStyle = document.getElementById("frame").value;
             let dotStyle = document.getElementById("dot").value;
-
             ctx.fillStyle = color;
 
-            pos.forEach(p => {
+            positions.forEach(p => {
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 ctx.scale(tileW / tileH, 1); 
-
                 let size = finderH;
                 
-                // Dış
+                // Dış Çerçeve
                 drawShape(ctx, 0, 0, size, frameStyle);
-                // Orta
-                ctx.fillStyle = "#fff";
+                
+                // Orta Boşluk (Arka plan resmini delmemesi için beyaz yerine 'destination-out' kullanabiliriz ama şimdilik beyaz kalsın, daha net okuyor)
+                ctx.fillStyle = "#fff"; 
                 let gap = tileH;
                 drawShape(ctx, gap, gap, size - gap*2, frameStyle);
-                // İç
+                
+                // İç Nokta
                 ctx.fillStyle = color;
                 let dotS = tileH * 3;
                 let off = (size - dotS) / 2;
                 drawShape(ctx, off, off, dotS, dotStyle);
-
                 ctx.restore();
             });
         }
@@ -258,30 +281,21 @@
             if (style === "square") ctx.rect(x, y, s, s);
             else if (style === "circle") ctx.arc(x + s/2, y + s/2, s/2, 0, Math.PI * 2);
             else if (style === "rounded") ctx.roundRect(x, y, s, s, s*0.25);
-            else if (style === "leaf") ctx.roundRect(x, y, s, s, [s/2, 0, s/2, 0]);
-            else if (style === "diamond") {
-                ctx.moveTo(x + s/2, y); ctx.lineTo(x + s, y + s/2);
-                ctx.lineTo(x + s/2, y + s); ctx.lineTo(x, y + s/2);
-            }
             ctx.fill();
         }
 
         function downloadFinal() {
             let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ İŞLENİYOR...";
-            
+            btn.innerText = "⏳ İŞLENİYOR... (Biraz sürebilir)";
             setTimeout(() => {
                 let bigCanvas = document.createElement("canvas");
-                // GERÇEK BOYUTTA ÇİZ
                 drawArt(bigCanvas, PAGE_W, PAGE_H, false);
-                
                 let link = document.createElement('a');
-                link.download = `QR_${currentUUID}.jpg`;
+                link.download = `ProQR_42x32_${Date.now()}.jpg`;
                 link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
                 link.click();
-
                 btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerHTML = `💾 İNDİR (${currentUUID})`, 2000);
+                setTimeout(() => btn.innerText = "💾 42x32cm JPEG İNDİR", 3000);
             }, 500);
         }
     </script>
