@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mega QR Stüdyo (Tüm Modeller)</title>
+    <title>Mega QR Stüdyo (Saf Emoji Modu)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
+        /* --- STİL AYARLARI (Aynı kaldı) --- */
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #0d0d0d;
@@ -26,16 +27,16 @@
             box-shadow: 0 10px 50px rgba(0,0,0,0.9);
         }
 
-        h2 { text-align: center; color: #00ffaa; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;}
+        h2 { text-align: center; color: #ffdd00; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;}
         
         .upload-area {
             border: 2px dashed #444; padding: 15px; text-align: center; margin-top: 15px; border-radius: 12px; cursor: pointer; transition: 0.3s;
             background-color: #222;
         }
-        .upload-area:hover { border-color: #00ffaa; background-color: #2a2a2a; }
+        .upload-area:hover { border-color: #ffdd00; background-color: #2a2a2a; }
         
         input[type="file"] { display: none; }
-        input[type="range"] { width: 100%; margin-top: 10px; accent-color: #00ffaa; cursor: pointer; }
+        input[type="range"] { width: 100%; margin-top: 10px; accent-color: #ffdd00; cursor: pointer; }
 
         label { display: block; margin-top: 15px; font-weight: bold; color: #ccc; font-size: 0.9rem;}
         input[type="text"], select {
@@ -53,14 +54,14 @@
             width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 10px;
             font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
-        .btn-gen { background: linear-gradient(45deg, #00ffaa, #00cc88); color: #000; }
+        .btn-gen { background: linear-gradient(45deg, #ffdd00, #ffbb00); color: #000; }
         .btn-gen:hover { transform: scale(1.02); }
         .btn-dl { background: linear-gradient(45deg, #ff0055, #cc0044); color: #fff; display: none; }
 
         #previewContainer {
             margin-top: 20px; background: #fff; padding: 10px;
             border-radius: 8px; display: none; text-align: center;
-            border: 2px solid #00ffaa;
+            border: 2px solid #ffdd00;
         }
         canvas { max-width: 100%; height: auto; display: block; }
     </style>
@@ -69,7 +70,7 @@
 
     <div class="panel">
         <h2>MEGA QR STÜDYO</h2>
-        <div style="text-align:center; font-size:0.8rem; color:#777;">42x32 Sayfa / Geniş Model Seçeneği</div>
+        <div style="text-align:center; font-size:0.8rem; color:#777;">42x32 Sayfa / Saf Emoji Modu (Teknik Kareler Yok)</div>
         
         <label>🔗 Link:</label>
         <input type="text" id="url" value="https://instagram.com">
@@ -98,7 +99,7 @@
             <div class="col">
                 <label>🔲 Dış Çerçeve:</label>
                 <select id="frame">
-                    <option value="leaf">🍃 Yaprak (Favori)</option>
+                    <option value="leaf">🍃 Yaprak</option>
                     <option value="square">⬛ Kare</option>
                     <option value="rounded">🔲 Yumuşak</option>
                     <option value="circle">⚫ Yuvarlak</option>
@@ -141,8 +142,7 @@
         let bgImgObj = null;
         let currentUID = "";
 
-        // HİZALAMA KARELERİ KOORDİNATLARI (Version 10)
-        const ALIGNMENT_COORDS = [6, 28, 50]; 
+        // NOT: ALIGNMENT_COORDS ve isAlignmentPattern fonksiyonları KALDIRILDI.
 
         function handleImage(e) {
             const file = e.target.files[0];
@@ -152,7 +152,7 @@
                     bgImgObj = new Image();
                     bgImgObj.onload = () => {
                         document.querySelector('.upload-text').innerText = "✅ " + file.name;
-                        document.querySelector('.upload-area').style.borderColor = "#00ffaa";
+                        document.querySelector('.upload-area').style.borderColor = "#ffdd00";
                     };
                     bgImgObj.src = evt.target.result;
                 };
@@ -164,22 +164,7 @@
             document.getElementById('opVal').innerText = val + '%';
         }
 
-        function isAlignmentPattern(r, c) {
-            // Küçük teknik karelerin tespiti
-            for (let rowCenter of ALIGNMENT_COORDS) {
-                for (let colCenter of ALIGNMENT_COORDS) {
-                    // Ana köşeleri atla
-                    if ((rowCenter === 6 && colCenter === 6) || 
-                        (rowCenter === 6 && colCenter === 50) || 
-                        (rowCenter === 50 && colCenter === 6)) continue;
-                    
-                    if (r >= rowCenter - 2 && r <= rowCenter + 2 && 
-                        c >= colCenter - 2 && c <= colCenter + 2) return true;
-                }
-            }
-            return false;
-        }
-
+        // Sadece Ana Köşeleri Kontrol Et
         function isFinderPattern(r, c, count) {
             return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
         }
@@ -192,7 +177,8 @@
             currentUID = uid;
             let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
 
-            // Version 10 (Teknik Görünüm için)
+            // Version 10'da kalmaya devam ediyoruz (Yoğunluk için)
+            // Ama artık teknik kareleri çizmeyeceğiz.
             let qr = qrcode(10, 'H'); 
             qr.addData(finalUrl);
             qr.make();
@@ -212,7 +198,7 @@
             canvas.width = w;
             canvas.height = h;
 
-            // Zemin Beyaz
+            // Zemin
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
@@ -243,32 +229,25 @@
 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.font = `${tileH * 0.85}px "Segoe UI Emoji", Arial, sans-serif`;
+            // Font boyutunu biraz daha büyüttüm ki boşluklar daha iyi dolsun
+            ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
 
-            // Verileri Çiz
+            // --- ANA ÇİZİM DÖNGÜSÜ (BASİTLEŞTİRİLDİ) ---
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
-                        let x = printAreaX + c * tileW;
-                        let y = printAreaY + r * tileH;
-                        let centerX = x + tileW/2;
-                        let centerY = y + tileH/2;
-
+                        
+                        // Sadece Ana Köşeleri Atla
                         if (isFinderPattern(r, c, count)) {
-                            continue; // Ana köşeler sonra çizilecek
+                            continue; 
                         } 
-                        else if (isAlignmentPattern(r, c)) {
-                            // *** KÜÇÜK TEKNİK KARELER ***
-                            // Burası parmakla gösterdiğin yer. 
-                            // Emoji basmak yerine geometrik şekil basıyoruz.
-                            ctx.fillStyle = mainColor;
-                            // Küçük kareler için 'dot' stilini kullanıyoruz
-                            drawCustomRect(ctx, x, y, tileW, tileH, dotStyle);
-                        } 
+                        // Geri kalan HER ŞEY EMOJİDİR.
+                        // (Eskiden burada teknik kare kontrolü vardı, sildik)
                         else {
-                            // Normal Veri -> Emoji
+                            let x = printAreaX + c * tileW + tileW/2;
+                            let y = printAreaY + r * tileH + tileH/2;
                             ctx.fillStyle = mainColor;
-                            ctx.fillText(emojiChar, centerX, centerY, tileW);
+                            ctx.fillText(emojiChar, x, y, tileW);
                         }
                     }
                 }
@@ -277,7 +256,7 @@
             // Ana Köşeleri Çiz
             drawLargeFinders(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
             
-            // Sağ Alt Süs Köşesi (Lavuk Modu)
+            // Sağ Alt Süs Köşesi
             drawExtraCorner(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
         }
 
@@ -297,7 +276,6 @@
         function drawExtraCorner(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
             let fw = tileW * 7;
             let fh = tileH * 7;
-            // Sağ alt koordinatı
             let px = startX + (count - 7) * tileW;
             let py = startY + (count - 7) * tileH;
             drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle);
@@ -305,26 +283,17 @@
 
         function drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle) {
             ctx.save();
-            
-            // 1. DIŞ ÇERÇEVE
             ctx.fillStyle = color;
             drawCustomRect(ctx, px, py, fw, fh, frameStyle);
-            
-            // 2. ORTA BOŞLUK (Beyaz)
-            ctx.globalCompositeOperation = "source-over"; // Üzerine çiz
+            ctx.globalCompositeOperation = "source-over"; 
             ctx.fillStyle = "rgba(255,255,255,0.9)"; 
-            // 1 birim içeriden boşalt
             drawCustomRect(ctx, px + tileW, py + tileH, fw - tileW*2, fh - tileH*2, frameStyle);
-            
-            // 3. İÇ NOKTA
             ctx.fillStyle = color;
-            // 2 birim içeriden nokta çiz
             drawCustomRect(ctx, px + tileW*2, py + tileH*2, fw - tileW*4, fh - tileH*4, dotStyle);
-            
             ctx.restore();
         }
 
-        // --- ŞEKİL ÇİZİM MOTORU (YENİ MODELLER EKLENDİ) ---
+        // --- ŞEKİL ÇİZİM MOTORU ---
         function drawCustomRect(ctx, x, y, w, h, style) {
             ctx.beginPath();
             let r = Math.min(w, h) / 2;
@@ -336,40 +305,29 @@
                 ctx.roundRect(x, y, w, h, r * 0.4);
             } 
             else if (style === "circle") {
-                ctx.arc(x + w/2, y + h/2, r, 0, Math.PI * 2);
+                ctx.roundRect(x, y, w, h, r);
             } 
             else if (style === "leaf") {
-                // Yaprak: Sol-Üst ve Sağ-Alt Yuvarlak, diğerleri sivri
                 ctx.roundRect(x, y, w, h, [r, 0, r, 0]);
             }
             else if (style === "diamond") {
-                // Elmas (Baklava)
-                ctx.moveTo(x + w/2, y);
-                ctx.lineTo(x + w, y + h/2);
-                ctx.lineTo(x + w/2, y + h);
-                ctx.lineTo(x, y + h/2);
+                ctx.moveTo(x + w/2, y); ctx.lineTo(x + w, y + h/2);
+                ctx.lineTo(x + w/2, y + h); ctx.lineTo(x, y + h/2);
             }
             else if (style === "octagon") {
-                // Sekizgen
                 let side = w * 0.3;
-                ctx.moveTo(x + side, y);
-                ctx.lineTo(x + w - side, y);
-                ctx.lineTo(x + w, y + side);
-                ctx.lineTo(x + w, y + h - side);
-                ctx.lineTo(x + w - side, y + h);
-                ctx.lineTo(x + side, y + h);
-                ctx.lineTo(x, y + h - side);
-                ctx.lineTo(x, y + side);
+                ctx.moveTo(x + side, y); ctx.lineTo(x + w - side, y);
+                ctx.lineTo(x + w, y + side); ctx.lineTo(x + w, y + h - side);
+                ctx.lineTo(x + w - side, y + h); ctx.lineTo(x + side, y + h);
+                ctx.lineTo(x, y + h - side); ctx.lineTo(x, y + side);
             }
             else if (style === "star") {
-                // Yıldız (Basit 4 köşeli)
                 ctx.moveTo(x + w/2, y);
                 ctx.quadraticCurveTo(x + w/2, y + h/2, x + w, y + h/2);
                 ctx.quadraticCurveTo(x + w/2, y + h/2, x + w/2, y + h);
                 ctx.quadraticCurveTo(x + w/2, y + h/2, x, y + h/2);
                 ctx.quadraticCurveTo(x + w/2, y + h/2, x + w/2, y);
             }
-
             ctx.fill();
         }
 
