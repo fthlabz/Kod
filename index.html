@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>40x30 CM ESNETİLMİŞ BASKI</title>
+    <title>42x32 Sayfada 40x30 Baskı</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         body {
@@ -17,7 +17,7 @@
         }
 
         .panel {
-            background: #2b2b2b;
+            background: #252525;
             padding: 25px;
             border-radius: 15px;
             width: 100%;
@@ -26,8 +26,12 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        h2 { text-align: center; color: #ff9100; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
-        .dims { text-align: center; color: #aaa; font-size: 0.85rem; margin-bottom: 20px; font-family: monospace; border-bottom: 1px solid #444; padding-bottom: 10px;}
+        h2 { text-align: center; color: #00ffaa; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
+        .dims { 
+            background: #333; padding: 10px; border-radius: 8px;
+            text-align: center; color: #fff; font-size: 0.9rem; margin-bottom: 20px; font-family: monospace; 
+            border: 1px dashed #555;
+        }
 
         label { display: block; margin-top: 15px; font-weight: bold; color: #ccc; font-size: 0.9rem;}
         input, select {
@@ -44,14 +48,14 @@
             width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 8px;
             font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
-        .btn-gen { background: #ff9100; color: #000; }
-        .btn-gen:hover { background: #ffaa33; }
+        .btn-gen { background: #00ffaa; color: #000; }
+        .btn-gen:hover { background: #00ffcc; }
         .btn-dl { background: #ff0055; color: #fff; display: none; }
-        .btn-dl:hover { background: #ff3377; }
 
         #previewContainer {
-            margin-top: 20px; background: #fff; padding: 10px;
+            margin-top: 20px; background: #fff; padding: 15px;
             border-radius: 4px; display: none; text-align: center;
+            border: 1px solid #ccc;
         }
         canvas { max-width: 100%; height: auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
     </style>
@@ -59,10 +63,11 @@
 <body>
 
     <div class="panel">
-        <h2>40x30 CM DİKDÖRTGEN MODU</h2>
+        <h2>PASPARTU BASKI (42x32)</h2>
         <div class="dims">
-            Baskı Alanı: 40cm x 30cm<br>
-            (QR Kodu Esnetilecektir)
+            📄 KAĞIT: 42cm x 32cm<br>
+            🖨️ BASKI: 40cm x 30cm<br>
+            (Kenarlarda 1'er cm Beyaz Pay)
         </div>
         
         <label>🔗 Hedef Link:</label>
@@ -103,16 +108,29 @@
         
         <div id="previewContainer">
             <canvas id="previewCanvas"></canvas>
-            <div style="color:#333; font-size:11px; margin-top:5px;">Önizleme (Esnetilmiş Görünüm)</div>
+            <div style="color:#333; font-size:11px; margin-top:5px;">Beyaz alanın tamamı 42x32cm kağıttır.</div>
         </div>
 
-        <button class="btn-dl" id="dlBtn" onclick="downloadPrintReady()">💾 40x30cm JPEG İNDİR</button>
+        <button class="btn-dl" id="dlBtn" onclick="downloadFinal()">💾 42x32cm JPEG İNDİR</button>
     </div>
 
     <script>
-        // --- SABİT ÖLÇÜLER ---
-        const TARGET_W = 3780; // 40 cm
-        const TARGET_H = 2835; // 30 cm
+        // --- BOYUT HESAPLARI (300 DPI) ---
+        // 1 cm = 118.11 piksel
+        const DPI = 118.11;
+
+        // 1. KAĞIT BOYUTU (42x32 cm)
+        const PAGE_W = Math.round(42 * DPI); // ~4961 px
+        const PAGE_H = Math.round(32 * DPI); // ~3780 px
+
+        // 2. BASKI ALANI (40x30 cm)
+        const PRINT_W = Math.round(40 * DPI); // ~4724 px
+        const PRINT_H = Math.round(30 * DPI); // ~3543 px
+
+        // 3. KENAR BOŞLUKLARI (Ortalamak için)
+        // (42 - 40) / 2 = 1cm boşluk
+        const MARGIN_X = (PAGE_W - PRINT_W) / 2;
+        const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
 
         let qrData = null;
 
@@ -125,103 +143,111 @@
             qr.make();
             qrData = qr;
 
-            // Önizleme için küçültülmüş boyutlar (4:3 oranı korunarak)
-            let previewW = 800;
-            let previewH = 600;
+            // Önizleme için %15 boyutunda çiz
+            let previewScale = 0.15;
             let canvas = document.getElementById("previewCanvas");
             
-            drawArt(canvas, previewW, previewH);
+            drawArt(canvas, PAGE_W * previewScale, PAGE_H * previewScale, true);
             
             document.getElementById("previewContainer").style.display = "block";
             document.getElementById("dlBtn").style.display = "block";
         }
 
-        // --- ÇİZİM MOTORU (ESNETME MODU) ---
-        function drawArt(canvas, w, h) {
+        // --- ÇİZİM MOTORU ---
+        function drawArt(canvas, w, h, isPreview) {
             let ctx = canvas.getContext("2d");
             canvas.width = w;
             canvas.height = h;
 
-            // 1. ZEMİN BEYAZ
+            // Ölçek (Gerçek boyuttan şimdiki boyuta oran)
+            let scale = w / PAGE_W;
+
+            // 1. ZEMİN (42x32 KAĞIT) - BEYAZ
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
+            // 2. BASKI ALANI HESABI (40x30 DİKDÖRTGEN)
+            // Bu alana QR kodunu YAYACAĞIZ (ESNETECEĞİZ)
+            let drawX = MARGIN_X * scale;
+            let drawY = MARGIN_Y * scale;
+            let drawW = PRINT_W * scale;
+            let drawH = PRINT_H * scale;
+
             let count = qrData.getModuleCount();
             
-            // ESNETME HESABI:
-            // Her bir modülün (karenin) genişliği ve yüksekliği farklı olacak.
-            let tileW = w / count;
-            let tileH = h / count;
+            // Hücre boyutu (Genişlik ve Yükseklik farklı çünkü dikdörtgen)
+            let tileW = drawW / count;
+            let tileH = drawH / count;
 
             let mainColor = document.getElementById("color").value;
             let emojiChar = document.getElementById("emoji").value || "⬛";
 
-            // 2. EMOJİLERİ ÇİZ
+            // 3. EMOJİLERİ ÇİZ
             ctx.fillStyle = mainColor;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // Font boyutunu yüksekliğe göre ayarla, genişliğe sığdır
-            let fontSize = tileH * 0.85;
-            ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
+            // Yüksekliğe göre font ayarla
+            ctx.font = `${tileH * 0.9}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
 
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
                         if (isFinder(r, c, count)) continue;
 
-                        let x = c * tileW + tileW / 2;
-                        let y = r * tileH + tileH / 2;
-                        // max-width vererek yatayda sıkışmasını sağlıyoruz
-                        ctx.fillText(emojiChar, x, y, tileW * 0.9);
+                        let x = drawX + c * tileW + tileW / 2;
+                        let y = drawY + r * tileH + tileH / 2;
+                        
+                        // Emojiyi yatayda hafif esneterek çiz (max-width ile)
+                        ctx.fillText(emojiChar, x, y, tileW);
                     }
                 }
             }
 
-            // 3. KÖŞELERİ ÇİZ (ESNETEREK)
-            drawFinders(ctx, count, tileW, tileH, mainColor);
+            // 4. KÖŞELERİ ÇİZ (ESNETEREK)
+            drawFinders(ctx, drawX, drawY, tileW, tileH, count, mainColor);
         }
 
         function isFinder(r, c, count) {
             return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
         }
 
-        function drawFinders(ctx, count, tileW, tileH, color) {
-            // Köşe işaretleri 7x7 modüldür
+        function drawFinders(ctx, startX, startY, tileW, tileH, count, color) {
             let finderW = tileW * 7;
             let finderH = tileH * 7;
-            
-            // Pozisyonlar (Sol-Üst, Sağ-Üst, Sol-Alt)
+
             let pos = [
-                {x: 0, y: 0},
-                {x: (count - 7) * tileW, y: 0},
-                {x: 0, y: (count - 7) * tileH}
+                {x: startX, y: startY}, // Sol Üst
+                {x: startX + (count - 7) * tileW, y: startY}, // Sağ Üst
+                {x: startX, y: startY + (count - 7) * tileH}  // Sol Alt
             ];
-            
+
             let frameStyle = document.getElementById("frame").value;
             let dotStyle = document.getElementById("dot").value;
 
             ctx.fillStyle = color;
 
             pos.forEach(p => {
-                // Şekilleri esnetmek için scale kullanıyoruz
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                ctx.scale(tileW / tileH, 1); // Yatayda esnet
+                // Dikdörtgen oranına göre şekli esnet
+                ctx.scale(tileW / tileH, 1); 
 
-                // Dış Çerçeve (Kare olarak çiziyoruz, scale ile dikdörtgen oluyor)
-                drawShape(ctx, 0, 0, finderH, frameStyle);
+                // Şekilleri çiz (Koordinatlar 0,0 çünkü translate ettik)
+                // KARE ÇİZER GİBİ ÇİZİYORUZ, SCALE ONU DİKDÖRTGEN YAPIYOR
+                let size = finderH; // Yüksekliği baz al
                 
-                // İç Boşluk
+                // Dış
+                drawShape(ctx, 0, 0, size, frameStyle);
+                // Orta Boşluk
                 ctx.fillStyle = "#fff";
                 let gap = tileH;
-                drawShape(ctx, gap, gap, finderH - gap*2, frameStyle);
-                
+                drawShape(ctx, gap, gap, size - gap*2, frameStyle);
                 // İç Nokta
                 ctx.fillStyle = color;
                 let dotS = tileH * 3;
-                let off = (finderH - dotS) / 2;
+                let off = (size - dotS) / 2;
                 drawShape(ctx, off, off, dotS, dotStyle);
-                
+
                 ctx.restore();
             });
         }
@@ -239,23 +265,23 @@
             ctx.fill();
         }
 
-        // --- TAM BOYUT İNDİRME ---
-        function downloadPrintReady() {
+        // --- İNDİRME ---
+        function downloadFinal() {
             let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ 3780x2835px İŞLENİYOR...";
+            btn.innerText = "⏳ 42x32cm İŞLENİYOR...";
             
             setTimeout(() => {
                 let bigCanvas = document.createElement("canvas");
-                // GERÇEK BOYUTLARDA ÇİZ (40cm x 30cm)
-                drawArt(bigCanvas, TARGET_W, TARGET_H);
+                // GERÇEK 42x32 BOYUTUNDA ÇİZ
+                drawArt(bigCanvas, PAGE_W, PAGE_H, false);
                 
                 let link = document.createElement('a');
-                link.download = `Baski_40x30_Esnetilmis_${Date.now()}.jpg`;
+                link.download = `Paspartu_42x32_${Date.now()}.jpg`;
                 link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
                 link.click();
 
                 btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerText = "💾 40x30cm JPEG İNDİR", 3000);
+                setTimeout(() => btn.innerText = "💾 42x32cm JPEG İNDİR", 3000);
             }, 500);
         }
     </script>
