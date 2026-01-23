@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mega QR Stüdyo (Saf Emoji Modu)</title>
+    <title>Eşsiz Paspartu QR (Standart Boy - Hızlı)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
-        /* --- STİL AYARLARI (Aynı kaldı) --- */
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #0d0d0d;
+            background-color: #000;
             color: #eee;
             display: flex;
             flex-direction: column;
@@ -18,71 +17,60 @@
         }
 
         .panel {
-            background: #181818;
-            padding: 25px;
-            border-radius: 16px;
+            background: #111;
+            padding: 20px;
+            border-radius: 15px;
             width: 100%;
             max-width: 500px;
             border: 1px solid #333;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.9);
         }
 
-        h2 { text-align: center; color: #ffdd00; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;}
-        
-        .upload-area {
-            border: 2px dashed #444; padding: 15px; text-align: center; margin-top: 15px; border-radius: 12px; cursor: pointer; transition: 0.3s;
-            background-color: #222;
+        h2 { text-align: center; color: #ff0055; margin-top: 0; text-transform: uppercase; font-size: 1.2rem; }
+        .dims { 
+            background: #222; padding: 10px; border-radius: 8px;
+            text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 20px; 
+            border: 1px dashed #444;
         }
-        .upload-area:hover { border-color: #ffdd00; background-color: #2a2a2a; }
-        
-        input[type="file"] { display: none; }
-        input[type="range"] { width: 100%; margin-top: 10px; accent-color: #ffdd00; cursor: pointer; }
 
-        label { display: block; margin-top: 15px; font-weight: bold; color: #ccc; font-size: 0.9rem;}
-        input[type="text"], select {
-            width: 100%; padding: 12px; background: #2d2d2d; border: 1px solid #444;
-            color: #fff; border-radius: 8px; margin-top: 5px; font-size: 16px; box-sizing: border-box;
+        label { display: block; margin-top: 10px; font-weight: bold; color: #aaa; font-size: 0.8rem;}
+        input, select {
+            width: 100%; padding: 10px; background: #222; border: 1px solid #444;
+            color: #fff; border-radius: 6px; margin-top: 5px; font-size: 14px; box-sizing: border-box;
         }
-        input[type="color"] { height: 50px; width:100%; padding: 0; border: none; cursor: pointer; }
-        
-        #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; }
+        input[type="color"] { height: 40px; padding: 2px; }
+        #emoji { text-align: center; font-size: 20px; }
 
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
 
         button {
-            width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 10px;
-            font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
+            width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
-        .btn-gen { background: linear-gradient(45deg, #ffdd00, #ffbb00); color: #000; }
-        .btn-gen:hover { transform: scale(1.02); }
-        .btn-dl { background: linear-gradient(45deg, #ff0055, #cc0044); color: #fff; display: none; }
+        .btn-gen { background: #ff0055; color: #fff; }
+        .btn-gen:hover { background: #ff3377; }
+        .btn-dl { background: #00e676; color: #000; display: none; margin-top: 10px; }
 
         #previewContainer {
             margin-top: 20px; background: #fff; padding: 10px;
-            border-radius: 8px; display: none; text-align: center;
-            border: 2px solid #ffdd00;
+            border-radius: 4px; display: none; text-align: center;
         }
         canvas { max-width: 100%; height: auto; display: block; }
+        .uuid-display { font-size: 10px; color: #666; margin-top: 5px; font-family: monospace; }
+        .info-note { font-size: 10px; color: #666; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="panel">
-        <h2>MEGA QR STÜDYO</h2>
-        <div style="text-align:center; font-size:0.8rem; color:#777;">42x32 Sayfa / Saf Emoji Modu (Teknik Kareler Yok)</div>
-        
-        <label>🔗 Link:</label>
-        <input type="text" id="url" value="https://instagram.com">
-
-        <label>🖼️ Arka Plan Resmi:</label>
-        <div class="upload-area" onclick="document.getElementById('bgInput').click()">
-            <div class="upload-text">Resim Seç</div>
+        <h2>STANDART EMOJİ QR</h2>
+        <div class="dims">
+            42x32cm Kağıt / 40x30cm Baskı<br>
+            <span style="color:#00e676">⚡ İri Emoji Modu (Okuması Kolay)</span>
         </div>
-        <input type="file" id="bgInput" accept="image/*" onchange="handleImage(event)">
         
-        <label>Resim Parlaklığı: <span id="opVal">40%</span></label>
-        <input type="range" id="bgOpacity" min="0" max="90" value="40" oninput="updateOpacityLabel(this.value)">
+        <label>🔗 Hedef Link:</label>
+        <input type="text" id="url" value="https://instagram.com" placeholder="https://...">
 
         <div class="row">
             <div class="col">
@@ -97,40 +85,37 @@
 
         <div class="row">
             <div class="col">
-                <label>🔲 Dış Çerçeve:</label>
+                <label>🔲 Çerçeve:</label>
                 <select id="frame">
-                    <option value="leaf">🍃 Yaprak</option>
-                    <option value="square">⬛ Kare</option>
-                    <option value="rounded">🔲 Yumuşak</option>
-                    <option value="circle">⚫ Yuvarlak</option>
-                    <option value="diamond">💎 Elmas</option>
-                    <option value="octagon">🛑 Sekizgen</option>
+                    <option value="square">Kare</option>
+                    <option value="rounded">Yumuşak</option>
+                    <option value="leaf">Yaprak</option>
+                    <option value="circle">Yuvarlak</option>
                 </select>
             </div>
             <div class="col">
-                <label>⚫ İç Nokta:</label>
+                <label>⚫ Nokta:</label>
                 <select id="dot">
-                    <option value="square">⬛ Kare</option>
-                    <option value="circle">⚫ Yuvarlak</option>
-                    <option value="diamond">💎 Elmas</option>
-                    <option value="star">⭐ Yıldız</option>
+                    <option value="square">Kare</option>
+                    <option value="circle">Yuvarlak</option>
+                    <option value="diamond">Elmas</option>
                 </select>
             </div>
         </div>
 
-        <button class="btn-gen" onclick="generate()">✨ DESENİ OLUŞTUR</button>
+        <button class="btn-gen" onclick="preparePreview()">🎲 Deseni Oluştur</button>
         
         <div id="previewContainer">
             <canvas id="previewCanvas"></canvas>
-            <div id="uidDisplay" style="font-size:10px; color:#333; margin-top:5px;"></div>
+            <div class="uuid-display" id="uuidText"></div>
+            <div class="info-note">Önizlemede sadece kare görünür (Hız için).<br>İndirince EMOJİ olur!</div>
         </div>
 
-        <button class="btn-dl" id="dlBtn" onclick="downloadHighRes()">💾 42x32cm JPEG İNDİR</button>
+        <button class="btn-dl" id="dlBtn" onclick="downloadFinal()">💾 EMOJİLİ OLARAK İNDİR</button>
     </div>
 
     <script>
-        // --- 42x32 KAĞIT / 40x30 BASKI ---
-        const DPI = 118.11; 
+        const DPI = 118.11;
         const PAGE_W = Math.round(42 * DPI);
         const PAGE_H = Math.round(32 * DPI);
         const PRINT_W = Math.round(40 * DPI);
@@ -139,211 +124,162 @@
         const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
 
         let qrData = null;
-        let bgImgObj = null;
-        let currentUID = "";
+        let currentUUID = "";
 
-        // NOT: ALIGNMENT_COORDS ve isAlignmentPattern fonksiyonları KALDIRILDI.
+        function preparePreview() {
+            let baseUrl = document.getElementById("url").value;
+            if(!baseUrl) return alert("Link gir!");
 
-        function handleImage(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    bgImgObj = new Image();
-                    bgImgObj.onload = () => {
-                        document.querySelector('.upload-text').innerText = "✅ " + file.name;
-                        document.querySelector('.upload-area').style.borderColor = "#ffdd00";
-                    };
-                    bgImgObj.src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
+            // Unique ID
+            let randomPart = Math.random().toString(36).substring(2, 6).toUpperCase(); // Biraz kısalttım (Daha az kare olsun diye)
+            let timestamp = Date.now().toString().slice(-3); // Biraz kısalttım
+            currentUUID = `ID-${randomPart}${timestamp}`;
+            
+            let finalUrl = baseUrl.includes("?") 
+                ? `${baseUrl}&u=${currentUUID}` 
+                : `${baseUrl}?u=${currentUUID}`;
 
-        function updateOpacityLabel(val) {
-            document.getElementById('opVal').innerText = val + '%';
-        }
-
-        // Sadece Ana Köşeleri Kontrol Et
-        function isFinderPattern(r, c, count) {
-            return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
-        }
-
-        function generate() {
-            let url = document.getElementById("url").value;
-            if(!url) return alert("Link giriniz!");
-
-            let uid = Math.random().toString(36).substr(2, 6).toUpperCase();
-            currentUID = uid;
-            let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
-
-            // Version 10'da kalmaya devam ediyoruz (Yoğunluk için)
-            // Ama artık teknik kareleri çizmeyeceğiz.
-            let qr = qrcode(10, 'H'); 
+            // --- İŞTE DÜZELTME BURADA ---
+            // 'H' (High) yerine 'L' (Low) yaptık.
+            // Bu sayede kare sayısı YARI YARIYA düştü. Emojiler büyüdü.
+            let qr = qrcode(0, 'L'); 
             qr.addData(finalUrl);
             qr.make();
             qrData = qr;
 
+            // Önizleme
             let canvas = document.getElementById("previewCanvas");
-            let scale = 0.15; 
-            drawArt(canvas, PAGE_W * scale, PAGE_H * scale);
+            drawArt(canvas, PAGE_W * 0.12, PAGE_H * 0.12, true);
             
-            document.getElementById("uidDisplay").innerText = "ID: " + uid;
+            document.getElementById("uuidText").innerText = `Kod: ${currentUUID}`;
             document.getElementById("previewContainer").style.display = "block";
-            document.getElementById("dlBtn").style.display = "block";
+            
+            let dlBtn = document.getElementById("dlBtn");
+            dlBtn.style.display = "block";
+            dlBtn.innerHTML = `💾 İNDİR (${currentUUID})`;
         }
 
-        function drawArt(canvas, w, h) {
+        function drawArt(canvas, w, h, isPreview) {
             let ctx = canvas.getContext("2d");
             canvas.width = w;
             canvas.height = h;
+            let scale = w / PAGE_W;
 
             // Zemin
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
-            let scaleFactor = w / PAGE_W;
-            let printAreaX = MARGIN_X * scaleFactor;
-            let printAreaY = MARGIN_Y * scaleFactor;
-            let printAreaW = PRINT_W * scaleFactor;
-            let printAreaH = PRINT_H * scaleFactor;
-
-            // Arka Plan Resmi
-            if (bgImgObj) {
-                ctx.save();
-                ctx.drawImage(bgImgObj, 0, 0, w, h);
-                let opacity = document.getElementById("bgOpacity").value / 100;
-                ctx.fillStyle = `rgba(255, 255, 255, ${1 - opacity})`;
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-            }
+            let drawX = MARGIN_X * scale;
+            let drawY = MARGIN_Y * scale;
+            let drawW = PRINT_W * scale;
+            let drawH = PRINT_H * scale;
 
             let count = qrData.getModuleCount();
-            let tileW = printAreaW / count;
-            let tileH = printAreaH / count;
+            let tileW = drawW / count;
+            let tileH = drawH / count;
 
             let mainColor = document.getElementById("color").value;
             let emojiChar = document.getElementById("emoji").value || "⬛";
-            let frameStyle = document.getElementById("frame").value;
-            let dotStyle = document.getElementById("dot").value;
 
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            // Font boyutunu biraz daha büyüttüm ki boşluklar daha iyi dolsun
-            ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
+            ctx.fillStyle = mainColor;
+            
+            if (!isPreview) {
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                // Emojiyi biraz daha büyüttüm (tileH * 0.95) - İyice dolsun
+                ctx.font = `${tileH * 0.95}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
+            }
 
-            // --- ANA ÇİZİM DÖNGÜSÜ (BASİTLEŞTİRİLDİ) ---
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
+                        if (isFinder(r, c, count)) continue;
                         
-                        // Sadece Ana Köşeleri Atla
-                        if (isFinderPattern(r, c, count)) {
-                            continue; 
-                        } 
-                        // Geri kalan HER ŞEY EMOJİDİR.
-                        // (Eskiden burada teknik kare kontrolü vardı, sildik)
-                        else {
-                            let x = printAreaX + c * tileW + tileW/2;
-                            let y = printAreaY + r * tileH + tileH/2;
-                            ctx.fillStyle = mainColor;
-                            ctx.fillText(emojiChar, x, y, tileW);
+                        let x = drawX + c * tileW;
+                        let y = drawY + r * tileH;
+
+                        if (isPreview) {
+                            ctx.fillRect(x, y, tileW + 0.6, tileH + 0.6); // Boşluksuz önizleme
+                        } else {
+                            ctx.fillText(emojiChar, x + tileW/2, y + tileH/2 + (tileH*0.1)); // Dikey ortalama ayarı
                         }
                     }
                 }
             }
 
-            // Ana Köşeleri Çiz
-            drawLargeFinders(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
-            
-            // Sağ Alt Süs Köşesi
-            drawExtraCorner(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
+            drawFinders(ctx, drawX, drawY, tileW, tileH, count, mainColor);
         }
 
-        function drawLargeFinders(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
-            let fw = tileW * 7;
-            let fh = tileH * 7;
-            let pos = [{r: 0, c: 0}, {r: 0, c: count - 7}, {r: count - 7, c: 0}];
+        function isFinder(r, c, count) {
+            return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
+        }
+
+        function drawFinders(ctx, startX, startY, tileW, tileH, count, color) {
+            let finderH = tileH * 7;
+            let pos = [
+                {x: startX, y: startY}, 
+                {x: startX + (count - 7) * tileW, y: startY}, 
+                {x: startX, y: startY + (count - 7) * tileH}  
+            ];
+
+            let frameStyle = document.getElementById("frame").value;
+            let dotStyle = document.getElementById("dot").value;
 
             ctx.fillStyle = color;
+
             pos.forEach(p => {
-                let px = startX + p.c * tileW;
-                let py = startY + p.r * tileH;
-                drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle);
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.scale(tileW / tileH, 1); 
+                let size = finderH;
+                
+                // Dış Çerçeve
+                drawShape(ctx, 0, 0, size, frameStyle); 
+                
+                // Orta (Beyaz boşluk)
+                ctx.fillStyle = "#fff";
+                let gap = tileH;
+                drawShape(ctx, gap, gap, size - gap*2, frameStyle); 
+                
+                // İç Nokta
+                ctx.fillStyle = color;
+                let dotS = tileH * 3;
+                let off = (size - dotS) / 2;
+                drawShape(ctx, off, off, dotS, dotStyle); 
+                
+                ctx.restore();
             });
         }
 
-        function drawExtraCorner(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
-            let fw = tileW * 7;
-            let fh = tileH * 7;
-            let px = startX + (count - 7) * tileW;
-            let py = startY + (count - 7) * tileH;
-            drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle);
-        }
-
-        function drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle) {
-            ctx.save();
-            ctx.fillStyle = color;
-            drawCustomRect(ctx, px, py, fw, fh, frameStyle);
-            ctx.globalCompositeOperation = "source-over"; 
-            ctx.fillStyle = "rgba(255,255,255,0.9)"; 
-            drawCustomRect(ctx, px + tileW, py + tileH, fw - tileW*2, fh - tileH*2, frameStyle);
-            ctx.fillStyle = color;
-            drawCustomRect(ctx, px + tileW*2, py + tileH*2, fw - tileW*4, fh - tileH*4, dotStyle);
-            ctx.restore();
-        }
-
-        // --- ŞEKİL ÇİZİM MOTORU ---
-        function drawCustomRect(ctx, x, y, w, h, style) {
+        function drawShape(ctx, x, y, s, style) {
             ctx.beginPath();
-            let r = Math.min(w, h) / 2;
-
-            if (style === "square") {
-                ctx.rect(x, y, w, h);
-            } 
-            else if (style === "rounded") {
-                ctx.roundRect(x, y, w, h, r * 0.4);
-            } 
-            else if (style === "circle") {
-                ctx.roundRect(x, y, w, h, r);
-            } 
-            else if (style === "leaf") {
-                ctx.roundRect(x, y, w, h, [r, 0, r, 0]);
-            }
+            if (style === "square") ctx.rect(x, y, s, s);
+            else if (style === "circle") ctx.arc(x + s/2, y + s/2, s/2, 0, Math.PI * 2);
+            else if (style === "rounded") ctx.roundRect(x, y, s, s, s*0.25);
+            else if (style === "leaf") ctx.roundRect(x, y, s, s, [s/2, 0, s/2, 0]);
             else if (style === "diamond") {
-                ctx.moveTo(x + w/2, y); ctx.lineTo(x + w, y + h/2);
-                ctx.lineTo(x + w/2, y + h); ctx.lineTo(x, y + h/2);
-            }
-            else if (style === "octagon") {
-                let side = w * 0.3;
-                ctx.moveTo(x + side, y); ctx.lineTo(x + w - side, y);
-                ctx.lineTo(x + w, y + side); ctx.lineTo(x + w, y + h - side);
-                ctx.lineTo(x + w - side, y + h); ctx.lineTo(x + side, y + h);
-                ctx.lineTo(x, y + h - side); ctx.lineTo(x, y + side);
-            }
-            else if (style === "star") {
-                ctx.moveTo(x + w/2, y);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x + w, y + h/2);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x + w/2, y + h);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x, y + h/2);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x + w/2, y);
+                ctx.moveTo(x + s/2, y); ctx.lineTo(x + s, y + s/2);
+                ctx.lineTo(x + s/2, y + s); ctx.lineTo(x, y + s/2);
             }
             ctx.fill();
         }
 
-        function downloadHighRes() {
+        function downloadFinal() {
             let btn = document.getElementById("dlBtn");
             btn.innerText = "⏳ HAZIRLANIYOR...";
+            
             setTimeout(() => {
                 let bigCanvas = document.createElement("canvas");
-                drawArt(bigCanvas, PAGE_W, PAGE_H);
+                drawArt(bigCanvas, PAGE_W, PAGE_H, false);
+                
                 let link = document.createElement('a');
-                link.download = `MegaQR_${currentUID}.jpg`;
+                link.download = `QR_${currentUUID}.jpg`;
                 link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
                 link.click();
+
                 btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerHTML = `💾 42x32cm JPEG İNDİR`, 3000);
-            }, 500);
+                setTimeout(() => btn.innerHTML = `💾 EMOJİLİ OLARAK İNDİR`, 3000);
+            }, 100);
         }
     </script>
 </body>
