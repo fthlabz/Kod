@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eşsiz Paspartu QR (Standart Boy - Hızlı)</title>
+    <title>Eşsiz Paspartu QR (İri Emoji Modu)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
+        /* --- ORİJİNAL TASARIM GERİ GELDİ --- */
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #000;
+            background-color: #1a1a1a;
             color: #eee;
             display: flex;
             flex-direction: column;
@@ -17,56 +18,59 @@
         }
 
         .panel {
-            background: #111;
-            padding: 20px;
+            background: #252525;
+            padding: 25px;
             border-radius: 15px;
             width: 100%;
             max-width: 500px;
-            border: 1px solid #333;
+            border: 1px solid #444;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        h2 { text-align: center; color: #ff0055; margin-top: 0; text-transform: uppercase; font-size: 1.2rem; }
+        h2 { text-align: center; color: #ff0055; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
         .dims { 
-            background: #222; padding: 10px; border-radius: 8px;
-            text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 20px; 
-            border: 1px dashed #444;
+            background: #333; padding: 10px; border-radius: 8px;
+            text-align: center; color: #fff; font-size: 0.9rem; margin-bottom: 20px; font-family: monospace; 
+            border: 1px dashed #555;
         }
 
-        label { display: block; margin-top: 10px; font-weight: bold; color: #aaa; font-size: 0.8rem;}
+        label { display: block; margin-top: 15px; font-weight: bold; color: #ccc; font-size: 0.9rem;}
         input, select {
-            width: 100%; padding: 10px; background: #222; border: 1px solid #444;
-            color: #fff; border-radius: 6px; margin-top: 5px; font-size: 14px; box-sizing: border-box;
+            width: 100%; padding: 12px; background: #383838; border: 1px solid #555;
+            color: #fff; border-radius: 6px; margin-top: 5px; font-size: 16px; box-sizing: border-box;
         }
-        input[type="color"] { height: 40px; padding: 2px; }
-        #emoji { text-align: center; font-size: 20px; }
+        input[type="color"] { height: 50px; padding: 2px; }
+        #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; }
 
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
 
         button {
-            width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 8px;
-            font-size: 14px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
+            width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
         .btn-gen { background: #ff0055; color: #fff; }
         .btn-gen:hover { background: #ff3377; }
-        .btn-dl { background: #00e676; color: #000; display: none; margin-top: 10px; }
+        .btn-dl { background: #00e676; color: #000; display: none; }
 
         #previewContainer {
-            margin-top: 20px; background: #fff; padding: 10px;
+            margin-top: 20px; background: #fff; padding: 15px;
             border-radius: 4px; display: none; text-align: center;
+            border: 1px solid #ccc;
         }
-        canvas { max-width: 100%; height: auto; display: block; }
+        canvas { max-width: 100%; height: auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .uuid-display { font-size: 10px; color: #666; margin-top: 5px; font-family: monospace; }
-        .info-note { font-size: 10px; color: #666; margin-top: 5px; }
+        .info-note { font-size: 11px; color: #333; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="panel">
-        <h2>STANDART EMOJİ QR</h2>
+        <h2>EŞSİZ QR MOTORU</h2>
         <div class="dims">
-            42x32cm Kağıt / 40x30cm Baskı<br>
-            <span style="color:#00e676">⚡ İri Emoji Modu (Okuması Kolay)</span>
+            📄 KAĞIT: 42cm x 32cm<br>
+            🖨️ BASKI: 40cm x 30cm<br>
+            🔒 İri Emojili & Okunaklı
         </div>
         
         <label>🔗 Hedef Link:</label>
@@ -103,23 +107,26 @@
             </div>
         </div>
 
-        <button class="btn-gen" onclick="preparePreview()">🎲 Deseni Oluştur</button>
+        <button class="btn-gen" onclick="preparePreview()">🎲 İri Desen Üret</button>
         
         <div id="previewContainer">
             <canvas id="previewCanvas"></canvas>
             <div class="uuid-display" id="uuidText"></div>
-            <div class="info-note">Önizlemede sadece kare görünür (Hız için).<br>İndirince EMOJİ olur!</div>
+            <div class="info-note">Görüntü kalitesi indirince artacaktır.</div>
         </div>
 
-        <button class="btn-dl" id="dlBtn" onclick="downloadFinal()">💾 EMOJİLİ OLARAK İNDİR</button>
+        <button class="btn-dl" id="dlBtn" onclick="downloadFinal()">💾 42x32cm JPEG İNDİR</button>
     </div>
 
     <script>
+        // --- BOYUT HESAPLARI (300 DPI) ---
         const DPI = 118.11;
-        const PAGE_W = Math.round(42 * DPI);
-        const PAGE_H = Math.round(32 * DPI);
-        const PRINT_W = Math.round(40 * DPI);
-        const PRINT_H = Math.round(30 * DPI);
+        const PAGE_W = Math.round(42 * DPI); // 42cm
+        const PAGE_H = Math.round(32 * DPI); // 32cm
+        const PRINT_W = Math.round(40 * DPI); // 40cm
+        const PRINT_H = Math.round(30 * DPI); // 30cm
+
+        // Kenar Boşlukları
         const MARGIN_X = (PAGE_W - PRINT_W) / 2;
         const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
 
@@ -130,28 +137,31 @@
             let baseUrl = document.getElementById("url").value;
             if(!baseUrl) return alert("Link gir!");
 
-            // Unique ID
-            let randomPart = Math.random().toString(36).substring(2, 6).toUpperCase(); // Biraz kısalttım (Daha az kare olsun diye)
-            let timestamp = Date.now().toString().slice(-3); // Biraz kısalttım
+            // Unique ID Sistemi (Linke ?uuid=... ekler)
+            // Kısa tuttum ki QR kod fazla kare üretmesin.
+            let randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+            let timestamp = Date.now().toString().slice(-3);
             currentUUID = `ID-${randomPart}${timestamp}`;
             
             let finalUrl = baseUrl.includes("?") 
                 ? `${baseUrl}&u=${currentUUID}` 
                 : `${baseUrl}?u=${currentUUID}`;
 
-            // --- İŞTE DÜZELTME BURADA ---
-            // 'H' (High) yerine 'L' (Low) yaptık.
-            // Bu sayede kare sayısı YARI YARIYA düştü. Emojiler büyüdü.
-            let qr = qrcode(0, 'L'); 
+            // --- KRİTİK AYAR BURADA ---
+            // 'L' (Low) yaptık. Emojiler büyüdü, kare sayısı azaldı.
+            // Sağ alttaki karmaşa bu sayede çözüldü.
+            let qr = qrcode(0, 'L');
             qr.addData(finalUrl);
             qr.make();
             qrData = qr;
 
-            // Önizleme
+            // Önizleme Çiz (Telefonu yormasın diye ufak boyut)
+            let previewScale = 0.15;
             let canvas = document.getElementById("previewCanvas");
-            drawArt(canvas, PAGE_W * 0.12, PAGE_H * 0.12, true);
+            // true = Önizleme Modu (Hızlı çizim için)
+            drawArt(canvas, PAGE_W * previewScale, PAGE_H * previewScale, true);
             
-            document.getElementById("uuidText").innerText = `Kod: ${currentUUID}`;
+            document.getElementById("uuidText").innerText = `Kilitlenen Benzersiz Kod: ${currentUUID}`;
             document.getElementById("previewContainer").style.display = "block";
             
             let dlBtn = document.getElementById("dlBtn");
@@ -163,12 +173,14 @@
             let ctx = canvas.getContext("2d");
             canvas.width = w;
             canvas.height = h;
+
             let scale = w / PAGE_W;
 
-            // Zemin
+            // 1. ZEMİN (42x32) Beyaz
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
+            // 2. BASKI ALANI (40x30)
             let drawX = MARGIN_X * scale;
             let drawY = MARGIN_Y * scale;
             let drawW = PRINT_W * scale;
@@ -182,26 +194,27 @@
             let emojiChar = document.getElementById("emoji").value || "⬛";
 
             ctx.fillStyle = mainColor;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
             
-            if (!isPreview) {
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                // Emojiyi biraz daha büyüttüm (tileH * 0.95) - İyice dolsun
-                ctx.font = `${tileH * 0.95}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
-            }
+            // Emoji boyutunu kareye tam oturacak şekilde ayarladık (0.95)
+            ctx.font = `${tileH * 0.95}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
 
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
+                        // 3 Büyük Köşe Karesini (Finder) atla, onları özel çizeceğiz
                         if (isFinder(r, c, count)) continue;
-                        
+
                         let x = drawX + c * tileW;
                         let y = drawY + r * tileH;
 
                         if (isPreview) {
-                            ctx.fillRect(x, y, tileW + 0.6, tileH + 0.6); // Boşluksuz önizleme
+                            // Önizlemede hızlı olsun diye düz kare çiz (Telefonda kasmasın)
+                            ctx.fillRect(x, y, tileW + 0.5, tileH + 0.5);
                         } else {
-                            ctx.fillText(emojiChar, x + tileW/2, y + tileH/2 + (tileH*0.1)); // Dikey ortalama ayarı
+                            // İndirirken gerçek EMOJİ çiz
+                            ctx.fillText(emojiChar, x + tileW/2, y + tileH/2 + (tileH*0.1));
                         }
                     }
                 }
@@ -211,11 +224,13 @@
         }
 
         function isFinder(r, c, count) {
+            // Sadece Sol Üst, Sağ Üst ve Sol Alt köşeleri koru
             return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
         }
 
         function drawFinders(ctx, startX, startY, tileW, tileH, count, color) {
             let finderH = tileH * 7;
+
             let pos = [
                 {x: startX, y: startY}, 
                 {x: startX + (count - 7) * tileW, y: startY}, 
@@ -231,22 +246,21 @@
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 ctx.scale(tileW / tileH, 1); 
+
                 let size = finderH;
                 
                 // Dış Çerçeve
-                drawShape(ctx, 0, 0, size, frameStyle); 
-                
-                // Orta (Beyaz boşluk)
+                drawShape(ctx, 0, 0, size, frameStyle);
+                // Orta Boşluk
                 ctx.fillStyle = "#fff";
                 let gap = tileH;
-                drawShape(ctx, gap, gap, size - gap*2, frameStyle); 
-                
+                drawShape(ctx, gap, gap, size - gap*2, frameStyle);
                 // İç Nokta
                 ctx.fillStyle = color;
                 let dotS = tileH * 3;
                 let off = (size - dotS) / 2;
-                drawShape(ctx, off, off, dotS, dotStyle); 
-                
+                drawShape(ctx, off, off, dotS, dotStyle);
+
                 ctx.restore();
             });
         }
@@ -266,19 +280,21 @@
 
         function downloadFinal() {
             let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ HAZIRLANIYOR...";
+            btn.innerText = "⏳ İŞLENİYOR... (Biraz Sürer)";
             
+            // Telefonun arayüzü donmasın diye ufak gecikme
             setTimeout(() => {
                 let bigCanvas = document.createElement("canvas");
+                // false = İndirme Modu (Gerçek Emojilerle Çizer)
                 drawArt(bigCanvas, PAGE_W, PAGE_H, false);
                 
                 let link = document.createElement('a');
                 link.download = `QR_${currentUUID}.jpg`;
-                link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
+                link.href = bigCanvas.toDataURL("image/jpeg", 0.92);
                 link.click();
 
                 btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerHTML = `💾 EMOJİLİ OLARAK İNDİR`, 3000);
+                setTimeout(() => btn.innerHTML = `💾 42x32cm JPEG İNDİR`, 3000);
             }, 100);
         }
     </script>
