@@ -142,8 +142,6 @@
         let bgImgObj = null;
         let currentUID = "";
 
-        // NOT: ALIGNMENT_COORDS ve isAlignmentPattern fonksiyonları KALDIRILDI.
-
         function handleImage(e) {
             const file = e.target.files[0];
             if (file) {
@@ -177,8 +175,11 @@
             currentUID = uid;
             let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
 
-            // --- DEĞİŞİKLİK BURADA: 'H' yerine 'L' yapıldı ---
-            let qr = qrcode(10, 'L'); 
+            // --- DEĞİŞİKLİK BURADA ---
+            // 1. 'H' yerine 'L' yapıldı (Daha az yedek veri, daha sade).
+            // 2. '10' yerine '0' yapıldı (Otomatik Boyut). 
+            // 0 yapmazsak L olsa bile kare sayısı azalmazdı. Şimdi minimum kareyi üretecek.
+            let qr = qrcode(0, 'L'); 
             qr.addData(finalUrl);
             qr.make();
             qrData = qr;
