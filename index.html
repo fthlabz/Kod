@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>42x32 Sayfada 40x30 Baskı</title>
+    <title>Eşsiz Paspartu QR (Her Seferinde Farklı)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         body {
@@ -26,7 +26,7 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        h2 { text-align: center; color: #00ffaa; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
+        h2 { text-align: center; color: #ff0055; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
         .dims { 
             background: #333; padding: 10px; border-radius: 8px;
             text-align: center; color: #fff; font-size: 0.9rem; margin-bottom: 20px; font-family: monospace; 
@@ -48,9 +48,9 @@
             width: 100%; padding: 18px; margin-top: 25px; border: none; border-radius: 8px;
             font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
-        .btn-gen { background: #00ffaa; color: #000; }
-        .btn-gen:hover { background: #00ffcc; }
-        .btn-dl { background: #ff0055; color: #fff; display: none; }
+        .btn-gen { background: #ff0055; color: #fff; }
+        .btn-gen:hover { background: #ff3377; }
+        .btn-dl { background: #00e676; color: #000; display: none; }
 
         #previewContainer {
             margin-top: 20px; background: #fff; padding: 15px;
@@ -58,16 +58,17 @@
             border: 1px solid #ccc;
         }
         canvas { max-width: 100%; height: auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .uuid-display { font-size: 10px; color: #666; margin-top: 5px; font-family: monospace; }
     </style>
 </head>
 <body>
 
     <div class="panel">
-        <h2>PASPARTU BASKI (42x32)</h2>
+        <h2>EŞSİZ QR MOTORU</h2>
         <div class="dims">
             📄 KAĞIT: 42cm x 32cm<br>
             🖨️ BASKI: 40cm x 30cm<br>
-            (Kenarlarda 1'er cm Beyaz Pay)
+            🔒 Her Tıklamada Yeni Desen
         </div>
         
         <label>🔗 Hedef Link:</label>
@@ -104,10 +105,11 @@
             </div>
         </div>
 
-        <button class="btn-gen" onclick="preparePreview()">✨ Önizle</button>
+        <button class="btn-gen" onclick="preparePreview()">🎲 Eşsiz Desen Üret</button>
         
         <div id="previewContainer">
             <canvas id="previewCanvas"></canvas>
+            <div class="uuid-display" id="uuidText"></div>
             <div style="color:#333; font-size:11px; margin-top:5px;">Beyaz alanın tamamı 42x32cm kağıttır.</div>
         </div>
 
@@ -116,94 +118,96 @@
 
     <script>
         // --- BOYUT HESAPLARI (300 DPI) ---
-        // 1 cm = 118.11 piksel
         const DPI = 118.11;
+        const PAGE_W = Math.round(42 * DPI); // 42cm
+        const PAGE_H = Math.round(32 * DPI); // 32cm
+        const PRINT_W = Math.round(40 * DPI); // 40cm
+        const PRINT_H = Math.round(30 * DPI); // 30cm
 
-        // 1. KAĞIT BOYUTU (42x32 cm)
-        const PAGE_W = Math.round(42 * DPI); // ~4961 px
-        const PAGE_H = Math.round(32 * DPI); // ~3780 px
-
-        // 2. BASKI ALANI (40x30 cm)
-        const PRINT_W = Math.round(40 * DPI); // ~4724 px
-        const PRINT_H = Math.round(30 * DPI); // ~3543 px
-
-        // 3. KENAR BOŞLUKLARI (Ortalamak için)
-        // (42 - 40) / 2 = 1cm boşluk
+        // Kenar Boşlukları
         const MARGIN_X = (PAGE_W - PRINT_W) / 2;
         const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
 
         let qrData = null;
+        let currentUUID = "";
 
         function preparePreview() {
-            let url = document.getElementById("url").value;
-            if(!url) return alert("Link gir!");
+            let baseUrl = document.getElementById("url").value;
+            if(!baseUrl) return alert("Link gir!");
+
+            // --- İŞTE SİHİR BURADA: UNIQUE ID ---
+            // Her tıklamada rastgele bir kod üretip linke ekliyoruz.
+            // Bu sayede QR deseni sonsuza kadar değişiyor.
+            let randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+            let timestamp = Date.now().toString().slice(-4);
+            currentUUID = `ID-${randomPart}${timestamp}`;
+            
+            // Linkin sonuna ?uid=... veya &uid=... ekle
+            let finalUrl = baseUrl.includes("?") 
+                ? `${baseUrl}&uuid=${currentUUID}` 
+                : `${baseUrl}?uuid=${currentUUID}`;
 
             let qr = qrcode(0, 'H');
-            qr.addData(url);
+            qr.addData(finalUrl);
             qr.make();
             qrData = qr;
 
-            // Önizleme için %15 boyutunda çiz
+            // Önizleme Çiz
             let previewScale = 0.15;
             let canvas = document.getElementById("previewCanvas");
-            
             drawArt(canvas, PAGE_W * previewScale, PAGE_H * previewScale, true);
             
+            // Bilgi metnini güncelle
+            document.getElementById("uuidText").innerText = `Kilitlenen Benzersiz Kod: ${currentUUID}`;
             document.getElementById("previewContainer").style.display = "block";
-            document.getElementById("dlBtn").style.display = "block";
+            
+            // İndirme butonunu güncelle (İçinde kod yazsın)
+            let dlBtn = document.getElementById("dlBtn");
+            dlBtn.style.display = "block";
+            dlBtn.innerHTML = `💾 İNDİR (${currentUUID})`;
         }
 
-        // --- ÇİZİM MOTORU ---
+        // --- ÇİZİM MOTORU (AYNI KALDI) ---
         function drawArt(canvas, w, h, isPreview) {
             let ctx = canvas.getContext("2d");
             canvas.width = w;
             canvas.height = h;
 
-            // Ölçek (Gerçek boyuttan şimdiki boyuta oran)
             let scale = w / PAGE_W;
 
-            // 1. ZEMİN (42x32 KAĞIT) - BEYAZ
+            // 1. ZEMİN (42x32)
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
-            // 2. BASKI ALANI HESABI (40x30 DİKDÖRTGEN)
-            // Bu alana QR kodunu YAYACAĞIZ (ESNETECEĞİZ)
+            // 2. BASKI ALANI (40x30)
             let drawX = MARGIN_X * scale;
             let drawY = MARGIN_Y * scale;
             let drawW = PRINT_W * scale;
             let drawH = PRINT_H * scale;
 
             let count = qrData.getModuleCount();
-            
-            // Hücre boyutu (Genişlik ve Yükseklik farklı çünkü dikdörtgen)
             let tileW = drawW / count;
             let tileH = drawH / count;
 
             let mainColor = document.getElementById("color").value;
             let emojiChar = document.getElementById("emoji").value || "⬛";
 
-            // 3. EMOJİLERİ ÇİZ
             ctx.fillStyle = mainColor;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // Yüksekliğe göre font ayarla
             ctx.font = `${tileH * 0.9}px "Apple Color Emoji", "Segoe UI Emoji", Arial, sans-serif`;
 
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
                         if (isFinder(r, c, count)) continue;
-
                         let x = drawX + c * tileW + tileW / 2;
                         let y = drawY + r * tileH + tileH / 2;
-                        
-                        // Emojiyi yatayda hafif esneterek çiz (max-width ile)
                         ctx.fillText(emojiChar, x, y, tileW);
                     }
                 }
             }
 
-            // 4. KÖŞELERİ ÇİZ (ESNETEREK)
             drawFinders(ctx, drawX, drawY, tileW, tileH, count, mainColor);
         }
 
@@ -216,9 +220,9 @@
             let finderH = tileH * 7;
 
             let pos = [
-                {x: startX, y: startY}, // Sol Üst
-                {x: startX + (count - 7) * tileW, y: startY}, // Sağ Üst
-                {x: startX, y: startY + (count - 7) * tileH}  // Sol Alt
+                {x: startX, y: startY}, 
+                {x: startX + (count - 7) * tileW, y: startY}, 
+                {x: startX, y: startY + (count - 7) * tileH}  
             ];
 
             let frameStyle = document.getElementById("frame").value;
@@ -229,20 +233,17 @@
             pos.forEach(p => {
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                // Dikdörtgen oranına göre şekli esnet
                 ctx.scale(tileW / tileH, 1); 
 
-                // Şekilleri çiz (Koordinatlar 0,0 çünkü translate ettik)
-                // KARE ÇİZER GİBİ ÇİZİYORUZ, SCALE ONU DİKDÖRTGEN YAPIYOR
-                let size = finderH; // Yüksekliği baz al
+                let size = finderH;
                 
                 // Dış
                 drawShape(ctx, 0, 0, size, frameStyle);
-                // Orta Boşluk
+                // Orta
                 ctx.fillStyle = "#fff";
                 let gap = tileH;
                 drawShape(ctx, gap, gap, size - gap*2, frameStyle);
-                // İç Nokta
+                // İç
                 ctx.fillStyle = color;
                 let dotS = tileH * 3;
                 let off = (size - dotS) / 2;
@@ -265,23 +266,22 @@
             ctx.fill();
         }
 
-        // --- İNDİRME ---
         function downloadFinal() {
             let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ 42x32cm İŞLENİYOR...";
+            btn.innerText = "⏳ İŞLENİYOR...";
             
             setTimeout(() => {
                 let bigCanvas = document.createElement("canvas");
-                // GERÇEK 42x32 BOYUTUNDA ÇİZ
+                // GERÇEK BOYUTTA ÇİZ
                 drawArt(bigCanvas, PAGE_W, PAGE_H, false);
                 
                 let link = document.createElement('a');
-                link.download = `Paspartu_42x32_${Date.now()}.jpg`;
+                link.download = `QR_${currentUUID}.jpg`;
                 link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
                 link.click();
 
                 btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerText = "💾 42x32cm JPEG İNDİR", 3000);
+                setTimeout(() => btn.innerHTML = `💾 İNDİR (${currentUUID})`, 2000);
             }, 500);
         }
     </script>
