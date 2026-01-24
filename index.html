@@ -142,6 +142,8 @@
         let bgImgObj = null;
         let currentUID = "";
 
+        // NOT: ALIGNMENT_COORDS ve isAlignmentPattern fonksiyonları KALDIRILDI.
+
         function handleImage(e) {
             const file = e.target.files[0];
             if (file) {
@@ -175,10 +177,8 @@
             currentUID = uid;
             let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
 
-            // --- DEĞİŞİKLİK BURADA ---
-            // 1. 'H' yerine 'L' yapıldı (Daha az yedek veri, daha sade).
-            // 2. '10' yerine '0' yapıldı (Otomatik Boyut). 
-            // 0 yapmazsak L olsa bile kare sayısı azalmazdı. Şimdi minimum kareyi üretecek.
+            // Version 10'da kalmaya devam ediyoruz (Yoğunluk için)
+            // Ama artık teknik kareleri çizmeyeceğiz.
             let qr = qrcode(0, 'L'); 
             qr.addData(finalUrl);
             qr.make();
@@ -232,7 +232,7 @@
             // Font boyutunu biraz daha büyüttüm ki boşluklar daha iyi dolsun
             ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
 
-            // --- ANA ÇİZİM DÖNGÜSÜ ---
+            // --- ANA ÇİZİM DÖNGÜSÜ (BASİTLEŞTİRİLDİ) ---
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
@@ -241,6 +241,8 @@
                         if (isFinderPattern(r, c, count)) {
                             continue; 
                         } 
+                        // Geri kalan HER ŞEY EMOJİDİR.
+                        // (Eskiden burada teknik kare kontrolü vardı, sildik)
                         else {
                             let x = printAreaX + c * tileW + tileW/2;
                             let y = printAreaY + r * tileH + tileH/2;
@@ -255,7 +257,7 @@
             drawLargeFinders(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
             
             // Sağ Alt Süs Köşesi
-            drawExtraCorner(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
+            // drawExtraCorner(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
         }
 
         function drawLargeFinders(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
