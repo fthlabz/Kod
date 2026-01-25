@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mega QR Stüdyo (Saf Emoji Modu)</title>
+    <title>Mega QR Stüdyo (Mobil Uyumlu)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        /* --- STİL AYARLARI (Aynı kaldı) --- */
+        /* --- STİL AYARLARI (MEVCUT) --- */
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #0d0d0d;
@@ -142,7 +142,7 @@
 
         <div class="pdf-section">
             <h3 style="text-align:center; color:#e63946; margin-bottom: 5px;">🖨️ MATBAA MODÜLÜ (PDF)</h3>
-            <div style="text-align:center; font-size:0.75rem; color:#aaa;">Herhangi bir resmi yükle, 42x32cm sayfaya ortala.</div>
+            <div style="text-align:center; font-size:0.75rem; color:#aaa;">Telefondan indirmek için "Dosyalara Kaydet" seçeneğini kullanın.</div>
             
             <label>🖼️ Baskı İçin Resim Yükle:</label>
             <div class="upload-area" onclick="document.getElementById('pdfInput').click()" style="border-color:#e63946;">
@@ -150,7 +150,7 @@
             </div>
             <input type="file" id="pdfInput" accept="image/*" onchange="handlePdfSelect(event)">
             
-            <button class="btn-pdf" onclick="generatePDF()">📄 PDF Olarak İndir (42x32cm)</button>
+            <button class="btn-pdf" onclick="generatePDF()">📄 PDF OLARAK KAYDET (42x32)</button>
         </div>
         </div>
 
@@ -171,7 +171,7 @@
         // --- YENİ DEĞİŞKEN (PDF İÇİN) ---
         let pdfImgData = null;
 
-        // --- MEVCUT FONKSİYONLAR (Dokunulmadı) ---
+        // --- MEVCUT FONKSİYONLAR (AYNEN KORUNDU) ---
 
         function handleImage(e) {
             const file = e.target.files[0];
@@ -344,7 +344,7 @@
         }
 
         // ==========================================
-        // YENİ EKLENEN PDF FONKSİYONLARI (BAĞIMSIZ)
+        // YENİ EKLENEN PDF FONKSİYONLARI (IPHONE FIX)
         // ==========================================
         
         function handlePdfSelect(e) {
@@ -366,24 +366,48 @@
                 return;
             }
 
-            // jsPDF Kütüphanesini Çağır
-            const { jsPDF } = window.jspdf;
+            const btn = document.querySelector(".btn-pdf");
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ PDF HAZIRLANIYOR...";
 
-            // 1. DOKÜMAN AYARLARI
-            // 'l' = landscape (yatay)
-            // 'cm' = birim (santimetre)
-            // [42, 32] = Sayfa Boyutu (Senin özel ölçün)
-            const doc = new jsPDF('l', 'cm', [42, 32]);
+            try {
+                // jsPDF Kütüphanesini Çağır
+                const { jsPDF } = window.jspdf;
 
-            // 2. RESMİ YERLEŞTİR (Upscale ve Ortalama)
-            // x = 1, y = 1 (Kenarlardan 1cm boşluk bırakır)
-            // w = 40, h = 30 (Resim boyutu tam 40x30 olur)
-            // Bu işlem resmi vektörel PDF içinde 40x30cm boyutuna yayar.
-            doc.addImage(pdfImgData, 'JPEG', 1, 1, 40, 30);
+                // 1. DOKÜMAN AYARLARI (42cm x 32cm)
+                const doc = new jsPDF('l', 'cm', [42, 32]);
 
-            // 3. İNDİR
-            let timeStamp = new Date().toISOString().slice(0,10);
-            doc.save(`Baski_40x30_${timeStamp}.pdf`);
+                // 2. RESMİ YERLEŞTİR (40x30cm - Ortalanmış)
+                doc.addImage(pdfImgData, 'JPEG', 1, 1, 40, 30);
+
+                // 3. IPHONE ÇÖZÜMÜ (Share Menüsünü Tetikle)
+                const pdfBlob = doc.output('blob');
+                
+                let timeStamp = new Date().toISOString().slice(0,10);
+                let fileName = `Baski_40x30_${timeStamp}.pdf`;
+
+                const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+                // Eğer telefon destekliyorsa PAYLAŞIM EKRANINI AÇ
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'QR Baskı Dosyası',
+                        text: '40x30cm Baskı için PDF dosyanız hazır.',
+                    });
+                } else {
+                    // Bilgisayar ise direkt indir
+                    doc.save(fileName);
+                }
+
+            } catch (err) {
+                // Eğer paylaşım iptal edilirse hata verme, sessiz kal
+                if (err.name !== 'AbortError') {
+                    alert("Bir hata oluştu: " + err.message);
+                }
+            } finally {
+                btn.innerText = originalText;
+            }
         }
     </script>
 </body>
