@@ -6,9 +6,8 @@
     <title>Mega QR Stüdyo (Mobil Uyumlu)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
+
     <style>
-        /* --- STİL AYARLARI (MEVCUT) --- */
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #0d0d0d;
@@ -30,13 +29,13 @@
         }
 
         h2 { text-align: center; color: #ffdd00; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;}
-        
+
         .upload-area {
             border: 2px dashed #444; padding: 15px; text-align: center; margin-top: 15px; border-radius: 12px; cursor: pointer; transition: 0.3s;
             background-color: #222;
         }
         .upload-area:hover { border-color: #ffdd00; background-color: #2a2a2a; }
-        
+
         input[type="file"] { display: none; }
         input[type="range"] { width: 100%; margin-top: 10px; accent-color: #ffdd00; cursor: pointer; }
 
@@ -46,7 +45,7 @@
             color: #fff; border-radius: 8px; margin-top: 5px; font-size: 16px; box-sizing: border-box;
         }
         input[type="color"] { height: 50px; width:100%; padding: 0; border: none; cursor: pointer; }
-        
+
         #emoji { text-align: center; font-size: 24px; letter-spacing: 5px; }
 
         .row { display: flex; gap: 10px; }
@@ -67,7 +66,6 @@
         }
         canvas { max-width: 100%; height: auto; display: block; }
 
-        /* YENİ MODÜL İÇİN STİL */
         .pdf-section {
             margin-top: 40px;
             padding-top: 20px;
@@ -77,338 +75,515 @@
             background: linear-gradient(45deg, #e63946, #d62828);
             color: white;
         }
+        .btn-jpg {
+            background: linear-gradient(45deg, #2a9d8f, #1f7a70);
+            color: white;
+        }
+        .hint {
+            text-align:center;
+            font-size:0.75rem;
+            color:#aaa;
+            margin-top:8px;
+            line-height:1.35;
+        }
     </style>
 </head>
 <body>
 
-    <div class="panel">
-        <h2>MEGA QR STÜDYO</h2>
-        <div style="text-align:center; font-size:0.8rem; color:#777;">42x32 Sayfa / Saf Emoji Modu (Teknik Kareler Yok)</div>
-        
-        <label>🔗 Link:</label>
-        <input type="text" id="url" value="https://instagram.com">
+<div class="panel">
+    <h2>MEGA QR STÜDYO</h2>
+    <div style="text-align:center; font-size:0.8rem; color:#777;">42x32 Sayfa / Saf Emoji Modu (Teknik Kareler Yok)</div>
 
-        <label>🖼️ Arka Plan Resmi:</label>
-        <div class="upload-area" onclick="document.getElementById('bgInput').click()">
-            <div class="upload-text">Resim Seç</div>
+    <label>🔗 Link:</label>
+    <input type="text" id="url" value="https://instagram.com">
+
+    <label>🖼️ Arka Plan Resmi:</label>
+    <div class="upload-area" onclick="document.getElementById('bgInput').click()">
+        <div class="upload-text">Resim Seç</div>
+    </div>
+    <input type="file" id="bgInput" accept="image/*" onchange="handleImage(event)">
+
+    <label>Resim Parlaklığı: <span id="opVal">40%</span></label>
+    <input type="range" id="bgOpacity" min="0" max="90" value="40" oninput="updateOpacityLabel(this.value)">
+
+    <div class="row">
+        <div class="col">
+            <label>😀 Emoji:</label>
+            <input type="text" id="emoji" value="🦁">
         </div>
-        <input type="file" id="bgInput" accept="image/*" onchange="handleImage(event)">
-        
-        <label>Resim Parlaklığı: <span id="opVal">40%</span></label>
-        <input type="range" id="bgOpacity" min="0" max="90" value="40" oninput="updateOpacityLabel(this.value)">
-
-        <div class="row">
-            <div class="col">
-                <label>😀 Emoji:</label>
-                <input type="text" id="emoji" value="🦁">
-            </div>
-            <div class="col">
-                <label>🎨 Renk:</label>
-                <input type="color" id="color" value="#000000">
-            </div>
+        <div class="col">
+            <label>🎨 Renk:</label>
+            <input type="color" id="color" value="#000000">
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col">
-                <label>🔲 Dış Çerçeve:</label>
-                <select id="frame">
-                    <option value="leaf">🍃 Yaprak</option>
-                    <option value="square">⬛ Kare</option>
-                    <option value="rounded">🔲 Yumuşak</option>
-                    <option value="circle">⚫ Yuvarlak</option>
-                    <option value="diamond">💎 Elmas</option>
-                    <option value="octagon">🛑 Sekizgen</option>
-                </select>
-            </div>
-            <div class="col">
-                <label>⚫ İç Nokta:</label>
-                <select id="dot">
-                    <option value="square">⬛ Kare</option>
-                    <option value="circle">⚫ Yuvarlak</option>
-                    <option value="diamond">💎 Elmas</option>
-                    <option value="star">⭐ Yıldız</option>
-                </select>
-            </div>
+    <div class="row">
+        <div class="col">
+            <label>🔲 Dış Çerçeve:</label>
+            <select id="frame">
+                <option value="leaf">🍃 Yaprak</option>
+                <option value="square">⬛ Kare</option>
+                <option value="rounded">🔲 Yumuşak</option>
+                <option value="circle">⚫ Yuvarlak</option>
+                <option value="diamond">💎 Elmas</option>
+                <option value="octagon">🛑 Sekizgen</option>
+            </select>
         </div>
-
-        <button class="btn-gen" onclick="generate()">✨ DESENİ OLUŞTUR</button>
-        
-        <div id="previewContainer">
-            <canvas id="previewCanvas"></canvas>
-            <div id="uidDisplay" style="font-size:10px; color:#333; margin-top:5px;"></div>
+        <div class="col">
+            <label>⚫ İç Nokta:</label>
+            <select id="dot">
+                <option value="square">⬛ Kare</option>
+                <option value="circle">⚫ Yuvarlak</option>
+                <option value="diamond">💎 Elmas</option>
+                <option value="star">⭐ Yıldız</option>
+            </select>
         </div>
+    </div>
 
-        <button class="btn-dl" id="dlBtn" onclick="downloadHighRes()">💾 42x32cm JPEG İNDİR</button>
+    <button class="btn-gen" onclick="generate()">✨ DESENİ OLUŞTUR</button>
 
-        <div class="pdf-section">
-            <h3 style="text-align:center; color:#e63946; margin-bottom: 5px;">🖨️ MATBAA MODÜLÜ (PDF)</h3>
-            <div style="text-align:center; font-size:0.75rem; color:#aaa;">Telefondan indirmek için "Dosyalara Kaydet" seçeneğini kullanın.</div>
-            
-            <label>🖼️ Baskı İçin Resim Yükle:</label>
-            <div class="upload-area" onclick="document.getElementById('pdfInput').click()" style="border-color:#e63946;">
-                <div class="upload-text" id="pdfText" style="color:#e63946;">📂 Resim Seç (.jpg / .png)</div>
-            </div>
-            <input type="file" id="pdfInput" accept="image/*" onchange="handlePdfSelect(event)">
-            
-            <button class="btn-pdf" onclick="generatePDF()">📄 PDF OLARAK KAYDET (42x32)</button>
+    <div id="previewContainer">
+        <canvas id="previewCanvas"></canvas>
+        <div id="uidDisplay" style="font-size:10px; color:#333; margin-top:5px;"></div>
+    </div>
+
+    <!-- MODIFIED: UPSCALE / JPEG ÇIKTI (42x32 sayfa içinde 40x30 alan; 2mm iç pay) -->
+    <button class="btn-dl" id="dlBtn" onclick="downloadUpscaledPrintJPG()">💾 42x32cm JPEG İNDİR (40x30 + 2mm pay)</button>
+
+    <div class="pdf-section">
+        <h3 style="text-align:center; color:#e63946; margin-bottom: 5px;">🖨️ MATBAA MODÜLÜ (PDF / JPEG)</h3>
+        <div class="hint">Yüklediğin resmi otomatik 40x30cm'e getirir. Her kenarda 2mm beyaz boşluk bırakır (istersen 1mm).</div>
+
+        <label>🖼️ Baskı İçin Resim Yükle:</label>
+        <div class="upload-area" onclick="document.getElementById('pdfInput').click()" style="border-color:#e63946;">
+            <div class="upload-text" id="pdfText" style="color:#e63946;">📂 Resim Seç (.jpg / .png)</div>
         </div>
-        </div>
+        <input type="file" id="pdfInput" accept="image/*" onchange="handlePdfSelect(event)">
 
-    <script>
-        // --- MEVCUT SİSTEM DEĞİŞKENLERİ ---
-        const DPI = 118.11; 
-        const PAGE_W = Math.round(42 * DPI);
-        const PAGE_H = Math.round(32 * DPI);
-        const PRINT_W = Math.round(40 * DPI);
-        const PRINT_H = Math.round(30 * DPI);
-        const MARGIN_X = (PAGE_W - PRINT_W) / 2;
-        const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
+        <!-- PDF (42x32) içinde 40x30 ortalı -->
+        <button class="btn-pdf" onclick="generatePDF()">📄 PDF OLARAK KAYDET (42x32 / 40x30 Ortalı)</button>
 
-        let qrData = null;
-        let bgImgObj = null;
-        let currentUID = "";
-        
-        // --- YENİ DEĞİŞKEN (PDF İÇİN) ---
-        let pdfImgData = null;
+        <!-- NEW: JPEG (40x30) tek parça + 2mm pay -->
+        <button class="btn-jpg" onclick="downloadUploadedAs4030JPG()">🖼️ 40x30 JPEG İNDİR (2mm pay)</button>
+    </div>
+</div>
 
-        // --- MEVCUT FONKSİYONLAR (AYNEN KORUNDU) ---
+<script>
+    // =========================
+    // ÖLÇÜLER / DÖNÜŞÜM
+    // =========================
+    // 300 DPI yaklaşık px/cm
+    const DPI = 118.11;
 
-        function handleImage(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    bgImgObj = new Image();
-                    bgImgObj.onload = () => {
-                        document.querySelector('.upload-text').innerText = "✅ " + file.name;
-                        document.querySelector('.upload-area').style.borderColor = "#ffdd00";
-                    };
-                    bgImgObj.src = evt.target.result;
+    // Sayfa: 42x32 cm
+    const PAGE_W = Math.round(42 * DPI);
+    const PAGE_H = Math.round(32 * DPI);
+
+    // Baskı alanı: 40x30 cm
+    const PRINT_W = Math.round(40 * DPI);
+    const PRINT_H = Math.round(30 * DPI);
+
+    // 42x32 içinde ortalama
+    const MARGIN_X = (PAGE_W - PRINT_W) / 2;
+    const MARGIN_Y = (PAGE_H - PRINT_H) / 2;
+
+    // 1-2mm beyaz boşluk (istediğin gibi 1 yapabilirsin)
+    const INNER_MARGIN_MM = 2; // 1 veya 2
+    const INNER_MARGIN_PX = Math.round((INNER_MARGIN_MM / 10) * DPI); // mm -> cm -> px
+
+    // =========================
+    // QR SİSTEMİ DEĞİŞKENLER
+    // =========================
+    let qrData = null;
+    let bgImgObj = null;
+    let currentUID = "";
+
+    // Yüklenen resim (PDF/JPEG modülü için)
+    let pdfImgData = null;
+    let uploadedImgObj = null;
+
+    // =========================
+    // ARKA PLAN YÜKLEME
+    // =========================
+    function handleImage(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                bgImgObj = new Image();
+                bgImgObj.onload = () => {
+                    document.querySelector('.upload-text').innerText = "✅ " + file.name;
+                    document.querySelector('.upload-area').style.borderColor = "#ffdd00";
                 };
-                reader.readAsDataURL(file);
-            }
+                bgImgObj.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
         }
+    }
 
-        function updateOpacityLabel(val) {
-            document.getElementById('opVal').innerText = val + '%';
-        }
+    function updateOpacityLabel(val) {
+        document.getElementById('opVal').innerText = val + '%';
+    }
 
-        function isFinderPattern(r, c, count) {
-            return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
-        }
+    // =========================
+    // QR OLUŞTURMA
+    // =========================
+    function isFinderPattern(r, c, count) {
+        return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
+    }
 
-        function generate() {
-            let url = document.getElementById("url").value;
-            if(!url) return alert("Link giriniz!");
+    function generate() {
+        let url = document.getElementById("url").value;
+        if (!url) return alert("Link giriniz!");
 
-            let uid = Math.random().toString(36).substr(2, 6).toUpperCase();
-            currentUID = uid;
-            let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
+        let uid = Math.random().toString(36).substr(2, 6).toUpperCase();
+        currentUID = uid;
+        let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
 
-            let qr = qrcode(0, 'L'); 
-            qr.addData(finalUrl);
-            qr.make();
-            qrData = qr;
+        let qr = qrcode(0, 'L');
+        qr.addData(finalUrl);
+        qr.make();
+        qrData = qr;
 
-            let canvas = document.getElementById("previewCanvas");
-            let scale = 0.15; 
-            drawArt(canvas, PAGE_W * scale, PAGE_H * scale);
-            
-            document.getElementById("uidDisplay").innerText = "ID: " + uid;
-            document.getElementById("previewContainer").style.display = "block";
-            document.getElementById("dlBtn").style.display = "block";
-        }
+        let canvas = document.getElementById("previewCanvas");
+        let scale = 0.15;
+        drawArt(canvas, PAGE_W * scale, PAGE_H * scale);
 
-        function drawArt(canvas, w, h) {
-            let ctx = canvas.getContext("2d");
-            canvas.width = w;
-            canvas.height = h;
+        document.getElementById("uidDisplay").innerText = "ID: " + uid;
+        document.getElementById("previewContainer").style.display = "block";
+        document.getElementById("dlBtn").style.display = "block";
+    }
 
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, w, h);
+    // =========================
+    // ÖNİZLEME ÇİZİMİ (MEVCUT)
+    // =========================
+    function drawArt(canvas, w, h) {
+        let ctx = canvas.getContext("2d");
+        canvas.width = w;
+        canvas.height = h;
 
-            let scaleFactor = w / PAGE_W;
-            let printAreaX = MARGIN_X * scaleFactor;
-            let printAreaY = MARGIN_Y * scaleFactor;
-            let printAreaW = PRINT_W * scaleFactor;
-            let printAreaH = PRINT_H * scaleFactor;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
 
-            if (bgImgObj) {
-                ctx.save();
-                ctx.drawImage(bgImgObj, 0, 0, w, h);
-                let opacity = document.getElementById("bgOpacity").value / 100;
-                ctx.fillStyle = `rgba(255, 255, 255, ${1 - opacity})`;
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-            }
+        let scaleFactor = w / PAGE_W;
+        let printAreaX = MARGIN_X * scaleFactor;
+        let printAreaY = MARGIN_Y * scaleFactor;
+        let printAreaW = PRINT_W * scaleFactor;
+        let printAreaH = PRINT_H * scaleFactor;
 
-            let count = qrData.getModuleCount();
-            let tileW = printAreaW / count;
-            let tileH = printAreaH / count;
-
-            let mainColor = document.getElementById("color").value;
-            let emojiChar = document.getElementById("emoji").value || "⬛";
-            let frameStyle = document.getElementById("frame").value;
-            let dotStyle = document.getElementById("dot").value;
-
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
-
-            for (let r = 0; r < count; r++) {
-                for (let c = 0; c < count; c++) {
-                    if (qrData.isDark(r, c)) {
-                        if (isFinderPattern(r, c, count)) {
-                            continue; 
-                        } 
-                        else {
-                            let x = printAreaX + c * tileW + tileW/2;
-                            let y = printAreaY + r * tileH + tileH/2;
-                            ctx.fillStyle = mainColor;
-                            ctx.fillText(emojiChar, x, y, tileW);
-                        }
-                    }
-                }
-            }
-
-            drawLargeFinders(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
-        }
-
-        function drawLargeFinders(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
-            let fw = tileW * 7;
-            let fh = tileH * 7;
-            let pos = [{r: 0, c: 0}, {r: 0, c: count - 7}, {r: count - 7, c: 0}];
-
-            ctx.fillStyle = color;
-            pos.forEach(p => {
-                let px = startX + p.c * tileW;
-                let py = startY + p.r * tileH;
-                drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle);
-            });
-        }
-
-        function drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle) {
+        if (bgImgObj) {
             ctx.save();
-            ctx.fillStyle = color;
-            drawCustomRect(ctx, px, py, fw, fh, frameStyle);
-            ctx.globalCompositeOperation = "source-over"; 
-            ctx.fillStyle = "rgba(255,255,255,0.9)"; 
-            drawCustomRect(ctx, px + tileW, py + tileH, fw - tileW*2, fh - tileH*2, frameStyle);
-            ctx.fillStyle = color;
-            drawCustomRect(ctx, px + tileW*2, py + tileH*2, fw - tileW*4, fh - tileH*4, dotStyle);
+            ctx.drawImage(bgImgObj, 0, 0, w, h);
+            let opacity = document.getElementById("bgOpacity").value / 100;
+            ctx.fillStyle = `rgba(255, 255, 255, ${1 - opacity})`;
+            ctx.fillRect(0, 0, w, h);
             ctx.restore();
         }
 
-        function drawCustomRect(ctx, x, y, w, h, style) {
-            ctx.beginPath();
-            let r = Math.min(w, h) / 2;
+        let count = qrData.getModuleCount();
+        let tileW = printAreaW / count;
+        let tileH = printAreaH / count;
 
-            if (style === "square") { ctx.rect(x, y, w, h); } 
-            else if (style === "rounded") { ctx.roundRect(x, y, w, h, r * 0.4); } 
-            else if (style === "circle") { ctx.roundRect(x, y, w, h, r); } 
-            else if (style === "leaf") { ctx.roundRect(x, y, w, h, [r, 0, r, 0]); }
-            else if (style === "diamond") {
-                ctx.moveTo(x + w/2, y); ctx.lineTo(x + w, y + h/2);
-                ctx.lineTo(x + w/2, y + h); ctx.lineTo(x, y + h/2);
-            }
-            else if (style === "octagon") {
-                let side = w * 0.3;
-                ctx.moveTo(x + side, y); ctx.lineTo(x + w - side, y);
-                ctx.lineTo(x + w, y + side); ctx.lineTo(x + w, y + h - side);
-                ctx.lineTo(x + w - side, y + h); ctx.lineTo(x + side, y + h);
-                ctx.lineTo(x, y + h - side); ctx.lineTo(x, y + side);
-            }
-            else if (style === "star") {
-                ctx.moveTo(x + w/2, y);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x + w, y + h/2);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x + w/2, y + h);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x, y + h/2);
-                ctx.quadraticCurveTo(x + w/2, y + h/2, x + w/2, y);
-            }
-            ctx.fill();
-        }
+        let mainColor = document.getElementById("color").value;
+        let emojiChar = document.getElementById("emoji").value || "⬛";
+        let frameStyle = document.getElementById("frame").value;
+        let dotStyle = document.getElementById("dot").value;
 
-        function downloadHighRes() {
-            let btn = document.getElementById("dlBtn");
-            btn.innerText = "⏳ HAZIRLANIYOR...";
-            setTimeout(() => {
-                let bigCanvas = document.createElement("canvas");
-                drawArt(bigCanvas, PAGE_W, PAGE_H);
-                let link = document.createElement('a');
-                link.download = `MegaQR_${currentUID}.jpg`;
-                link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
-                link.click();
-                btn.innerText = "✅ İNDİRİLDİ";
-                setTimeout(() => btn.innerHTML = `💾 42x32cm JPEG İNDİR`, 3000);
-            }, 500);
-        }
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
 
-        // ==========================================
-        // YENİ EKLENEN PDF FONKSİYONLARI (IPHONE FIX)
-        // ==========================================
-        
-        function handlePdfSelect(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    pdfImgData = evt.target.result; // Resmi hafızaya al
-                    document.getElementById('pdfText').innerText = "✅ " + file.name + " (Hazır)";
-                    document.querySelector('.upload-area[onclick*="pdfInput"]').style.borderColor = "#e63946";
-                };
-                reader.readAsDataURL(file);
+        for (let r = 0; r < count; r++) {
+            for (let c = 0; c < count; c++) {
+                if (qrData.isDark(r, c)) {
+                    if (isFinderPattern(r, c, count)) continue;
+
+                    let x = printAreaX + c * tileW + tileW / 2;
+                    let y = printAreaY + r * tileH + tileH / 2;
+                    ctx.fillStyle = mainColor;
+                    ctx.fillText(emojiChar, x, y, tileW);
+                }
             }
         }
 
-        async function generatePDF() {
-            if(!pdfImgData) {
-                alert("Önce baskı için bir resim yüklemelisiniz!");
+        drawLargeFinders(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
+    }
+
+    function drawLargeFinders(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
+        let fw = tileW * 7;
+        let fh = tileH * 7;
+        let pos = [{r: 0, c: 0}, {r: 0, c: count - 7}, {r: count - 7, c: 0}];
+
+        ctx.fillStyle = color;
+        pos.forEach(p => {
+            let px = startX + p.c * tileW;
+            let py = startY + p.r * tileH;
+            drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle);
+        });
+    }
+
+    function drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle) {
+        ctx.save();
+        ctx.fillStyle = color;
+        drawCustomRect(ctx, px, py, fw, fh, frameStyle);
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        drawCustomRect(ctx, px + tileW, py + tileH, fw - tileW * 2, fh - tileH * 2, frameStyle);
+        ctx.fillStyle = color;
+        drawCustomRect(ctx, px + tileW * 2, py + tileH * 2, fw - tileW * 4, fh - tileH * 4, dotStyle);
+        ctx.restore();
+    }
+
+    function drawCustomRect(ctx, x, y, w, h, style) {
+        ctx.beginPath();
+        let r = Math.min(w, h) / 2;
+
+        if (style === "square") { ctx.rect(x, y, w, h); }
+        else if (style === "rounded") { ctx.roundRect(x, y, w, h, r * 0.4); }
+        else if (style === "circle") { ctx.roundRect(x, y, w, h, r); }
+        else if (style === "leaf") { ctx.roundRect(x, y, w, h, [r, 0, r, 0]); }
+        else if (style === "diamond") {
+            ctx.moveTo(x + w / 2, y); ctx.lineTo(x + w, y + h / 2);
+            ctx.lineTo(x + w / 2, y + h); ctx.lineTo(x, y + h / 2);
+        }
+        else if (style === "octagon") {
+            let side = w * 0.3;
+            ctx.moveTo(x + side, y); ctx.lineTo(x + w - side, y);
+            ctx.lineTo(x + w, y + side); ctx.lineTo(x + w, y + h - side);
+            ctx.lineTo(x + w - side, y + h); ctx.lineTo(x + side, y + h);
+            ctx.lineTo(x, y + h - side); ctx.lineTo(x, y + side);
+        }
+        else if (style === "star") {
+            ctx.moveTo(x + w / 2, y);
+            ctx.quadraticCurveTo(x + w / 2, y + h / 2, x + w, y + h / 2);
+            ctx.quadraticCurveTo(x + w / 2, y + h / 2, x + w / 2, y + h);
+            ctx.quadraticCurveTo(x + w / 2, y + h / 2, x, y + h / 2);
+            ctx.quadraticCurveTo(x + w / 2, y + h / 2, x + w / 2, y);
+        }
+        ctx.fill();
+    }
+
+    // ==========================================================
+    // MODIFIED: UPSCALE/JPEG ÇIKTI
+    // 42x32 beyaz sayfa içinde 40x30 baskı alanı ve 2mm iç pay
+    // ==========================================================
+    function renderQRPrintPageToCanvas(canvas) {
+        if (!qrData) {
+            alert("Önce DESENİ OLUŞTUR (QR üret)!");
+            return false;
+        }
+
+        const ctx = canvas.getContext("2d");
+        canvas.width = PAGE_W;
+        canvas.height = PAGE_H;
+
+        // 1) Sayfa zemini beyaz
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+
+        // 2) Arka plan resmi (varsa) tüm sayfaya bas + parlaklık/opacity
+        if (bgImgObj) {
+            ctx.save();
+            ctx.drawImage(bgImgObj, 0, 0, PAGE_W, PAGE_H);
+            const opacity = document.getElementById("bgOpacity").value / 100;
+            ctx.fillStyle = `rgba(255, 255, 255, ${1 - opacity})`;
+            ctx.fillRect(0, 0, PAGE_W, PAGE_H);
+            ctx.restore();
+        }
+
+        // 3) Baskı alanı içinde 2mm beyaz pay bırakıp QR'ı o iç alana çiz
+        const printX = Math.round(MARGIN_X);
+        const printY = Math.round(MARGIN_Y);
+
+        const innerX = printX + INNER_MARGIN_PX;
+        const innerY = printY + INNER_MARGIN_PX;
+        const innerW = PRINT_W - 2 * INNER_MARGIN_PX;
+        const innerH = PRINT_H - 2 * INNER_MARGIN_PX;
+
+        // İç alanın zemini beyaz kalsın (pay net görünsün)
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(printX, printY, PRINT_W, PRINT_H);
+
+        const count = qrData.getModuleCount();
+        const tileW = innerW / count;
+        const tileH = innerH / count;
+
+        const mainColor = document.getElementById("color").value;
+        const emojiChar = document.getElementById("emoji").value || "⬛";
+        const frameStyle = document.getElementById("frame").value;
+        const dotStyle = document.getElementById("dot").value;
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
+
+        for (let r = 0; r < count; r++) {
+            for (let c = 0; c < count; c++) {
+                if (qrData.isDark(r, c)) {
+                    if (isFinderPattern(r, c, count)) continue;
+
+                    const x = innerX + c * tileW + tileW / 2;
+                    const y = innerY + r * tileH + tileH / 2;
+                    ctx.fillStyle = mainColor;
+                    ctx.fillText(emojiChar, x, y, tileW);
+                }
+            }
+        }
+
+        // Finder'lar da aynı iç alana göre
+        drawLargeFinders(ctx, innerX, innerY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
+        return true;
+    }
+
+    function downloadUpscaledPrintJPG() {
+        const btn = document.getElementById("dlBtn");
+        btn.innerText = "⏳ HAZIRLANIYOR...";
+
+        setTimeout(() => {
+            const bigCanvas = document.createElement("canvas");
+            const ok = renderQRPrintPageToCanvas(bigCanvas);
+            if (!ok) {
+                btn.innerText = "💾 42x32cm JPEG İNDİR (40x30 + 2mm pay)";
                 return;
             }
 
-            const btn = document.querySelector(".btn-pdf");
-            const originalText = btn.innerText;
-            btn.innerText = "⏳ PDF HAZIRLANIYOR...";
+            const link = document.createElement('a');
+            link.download = `MegaQR_42x32_${INNER_MARGIN_MM}mmPay_${currentUID || "NOID"}.jpg`;
+            link.href = bigCanvas.toDataURL("image/jpeg", 0.95);
+            link.click();
 
-            try {
-                // jsPDF Kütüphanesini Çağır
-                const { jsPDF } = window.jspdf;
+            btn.innerText = "✅ İNDİRİLDİ";
+            setTimeout(() => btn.innerHTML = `💾 42x32cm JPEG İNDİR (40x30 + 2mm pay)`, 3000);
+        }, 350);
+    }
 
-                // 1. DOKÜMAN AYARLARI (42cm x 32cm)
-                const doc = new jsPDF('l', 'cm', [42, 32]);
+    // ==========================================
+    // PDF/JPEG MODÜLÜ: RESİM SEÇİMİ
+    // ==========================================
+    function handlePdfSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-                // 2. RESMİ YERLEŞTİR (40x30cm - Ortalanmış)
-                doc.addImage(pdfImgData, 'JPEG', 1, 1, 40, 30);
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            // PDF için base64
+            pdfImgData = evt.target.result;
 
-                // 3. IPHONE ÇÖZÜMÜ (Share Menüsünü Tetikle)
-                const pdfBlob = doc.output('blob');
-                
-                let timeStamp = new Date().toISOString().slice(0,10);
-                let fileName = `Baski_40x30_${timeStamp}.pdf`;
+            // JPEG çıktısı için Image objesi
+            uploadedImgObj = new Image();
+            uploadedImgObj.onload = () => {
+                document.getElementById('pdfText').innerText = "✅ " + file.name + " (Hazır)";
+                document.querySelector('.upload-area[onclick*="pdfInput"]').style.borderColor = "#e63946";
+            };
+            uploadedImgObj.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 
-                const file = new File([pdfBlob], fileName, { type: "application/pdf" });
-
-                // Eğer telefon destekliyorsa PAYLAŞIM EKRANINI AÇ
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'QR Baskı Dosyası',
-                        text: '40x30cm Baskı için PDF dosyanız hazır.',
-                    });
-                } else {
-                    // Bilgisayar ise direkt indir
-                    doc.save(fileName);
-                }
-
-            } catch (err) {
-                // Eğer paylaşım iptal edilirse hata verme, sessiz kal
-                if (err.name !== 'AbortError') {
-                    alert("Bir hata oluştu: " + err.message);
-                }
-            } finally {
-                btn.innerText = originalText;
-            }
+    // ==========================================
+    // PDF: 42x32 içinde 40x30 ortalı (MEVCUT)
+    // ==========================================
+    async function generatePDF() {
+        if (!pdfImgData) {
+            alert("Önce baskı için bir resim yüklemelisiniz!");
+            return;
         }
-    </script>
+
+        const btn = document.querySelector(".btn-pdf");
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ PDF HAZIRLANIYOR...";
+
+        try {
+            const { jsPDF } = window.jspdf;
+
+            // 42cm x 32cm
+            const doc = new jsPDF('l', 'cm', [42, 32]);
+
+            // 40x30 ortalı: x=1, y=1 (42-40=2cm => her yanda 1cm)
+            doc.addImage(pdfImgData, 'JPEG', 1, 1, 40, 30);
+
+            const pdfBlob = doc.output('blob');
+
+            let timeStamp = new Date().toISOString().slice(0, 10);
+            let fileName = `Baski_40x30_${timeStamp}.pdf`;
+
+            const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'QR Baskı Dosyası',
+                    text: '40x30cm Baskı için PDF dosyanız hazır.',
+                });
+            } else {
+                doc.save(fileName);
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                alert("Bir hata oluştu: " + err.message);
+            }
+        } finally {
+            btn.innerText = originalText;
+        }
+    }
+
+    // ==========================================
+    // NEW: JPEG - Yüklenen resmi 40x30'a çevir + 2mm pay
+    // ==========================================
+    function renderUploadedTo4030Canvas(canvas) {
+        if (!uploadedImgObj) {
+            alert("Önce bir resim seçmelisin!");
+            return false;
+        }
+
+        const ctx = canvas.getContext("2d");
+        canvas.width = PRINT_W;
+        canvas.height = PRINT_H;
+
+        // Zemin beyaz
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, PRINT_W, PRINT_H);
+
+        // İç alan (2mm pay)
+        const innerX = INNER_MARGIN_PX;
+        const innerY = INNER_MARGIN_PX;
+        const innerW = PRINT_W - 2 * INNER_MARGIN_PX;
+        const innerH = PRINT_H - 2 * INNER_MARGIN_PX;
+
+        // Resmi iç alana TAM doldur (esneterek)
+        ctx.drawImage(uploadedImgObj, innerX, innerY, innerW, innerH);
+        return true;
+    }
+
+    function downloadUploadedAs4030JPG() {
+        const btn = document.querySelector(".btn-jpg");
+        const originalText = btn.innerText;
+
+        if (!uploadedImgObj) {
+            alert("Önce bir resim seçmelisin!");
+            return;
+        }
+
+        btn.innerText = "⏳ HAZIRLANIYOR...";
+
+        setTimeout(() => {
+            const canvas = document.createElement("canvas");
+            const ok = renderUploadedTo4030Canvas(canvas);
+            if (!ok) {
+                btn.innerText = originalText;
+                return;
+            }
+
+            const a = document.createElement("a");
+            const stamp = new Date().toISOString().slice(0, 10);
+            a.download = `Baski_40x30_${INNER_MARGIN_MM}mmPay_${stamp}.jpg`;
+            a.href = canvas.toDataURL("image/jpeg", 0.95);
+            a.click();
+
+            btn.innerText = "✅ İNDİRİLDİ";
+            setTimeout(() => (btn.innerText = originalText), 2500);
+        }, 250);
+    }
+</script>
 </body>
 </html>
