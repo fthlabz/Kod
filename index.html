@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mega QR Stüdyo (Saf Emoji Modu)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
         /* --- STİL AYARLARI (Aynı kaldı) --- */
         body {
@@ -64,6 +66,17 @@
             border: 2px solid #ffdd00;
         }
         canvas { max-width: 100%; height: auto; display: block; }
+
+        /* YENİ MODÜL İÇİN STİL */
+        .pdf-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed #444;
+        }
+        .btn-pdf {
+            background: linear-gradient(45deg, #e63946, #d62828);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -126,10 +139,23 @@
         </div>
 
         <button class="btn-dl" id="dlBtn" onclick="downloadHighRes()">💾 42x32cm JPEG İNDİR</button>
-    </div>
+
+        <div class="pdf-section">
+            <h3 style="text-align:center; color:#e63946; margin-bottom: 5px;">🖨️ MATBAA MODÜLÜ (PDF)</h3>
+            <div style="text-align:center; font-size:0.75rem; color:#aaa;">Herhangi bir resmi yükle, 42x32cm sayfaya ortala.</div>
+            
+            <label>🖼️ Baskı İçin Resim Yükle:</label>
+            <div class="upload-area" onclick="document.getElementById('pdfInput').click()" style="border-color:#e63946;">
+                <div class="upload-text" id="pdfText" style="color:#e63946;">📂 Resim Seç (.jpg / .png)</div>
+            </div>
+            <input type="file" id="pdfInput" accept="image/*" onchange="handlePdfSelect(event)">
+            
+            <button class="btn-pdf" onclick="generatePDF()">📄 PDF Olarak İndir (42x32cm)</button>
+        </div>
+        </div>
 
     <script>
-        // --- 42x32 KAĞIT / 40x30 BASKI ---
+        // --- MEVCUT SİSTEM DEĞİŞKENLERİ ---
         const DPI = 118.11; 
         const PAGE_W = Math.round(42 * DPI);
         const PAGE_H = Math.round(32 * DPI);
@@ -141,8 +167,11 @@
         let qrData = null;
         let bgImgObj = null;
         let currentUID = "";
+        
+        // --- YENİ DEĞİŞKEN (PDF İÇİN) ---
+        let pdfImgData = null;
 
-        // NOT: ALIGNMENT_COORDS ve isAlignmentPattern fonksiyonları KALDIRILDI.
+        // --- MEVCUT FONKSİYONLAR (Dokunulmadı) ---
 
         function handleImage(e) {
             const file = e.target.files[0];
@@ -164,7 +193,6 @@
             document.getElementById('opVal').innerText = val + '%';
         }
 
-        // Sadece Ana Köşeleri Kontrol Et
         function isFinderPattern(r, c, count) {
             return (r < 7 && c < 7) || (r < 7 && c >= count - 7) || (r >= count - 7 && c < 7);
         }
@@ -177,8 +205,6 @@
             currentUID = uid;
             let finalUrl = url.includes("?") ? `${url}&id=${uid}` : `${url}?id=${uid}`;
 
-            // Version 10'da kalmaya devam ediyoruz (Yoğunluk için)
-            // Ama artık teknik kareleri çizmeyeceğiz.
             let qr = qrcode(0, 'L'); 
             qr.addData(finalUrl);
             qr.make();
@@ -198,7 +224,6 @@
             canvas.width = w;
             canvas.height = h;
 
-            // Zemin
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, w, h);
 
@@ -208,7 +233,6 @@
             let printAreaW = PRINT_W * scaleFactor;
             let printAreaH = PRINT_H * scaleFactor;
 
-            // Arka Plan Resmi
             if (bgImgObj) {
                 ctx.save();
                 ctx.drawImage(bgImgObj, 0, 0, w, h);
@@ -229,20 +253,14 @@
 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // Font boyutunu biraz daha büyüttüm ki boşluklar daha iyi dolsun
             ctx.font = `${tileH * 0.92}px "Segoe UI Emoji", Arial, sans-serif`;
 
-            // --- ANA ÇİZİM DÖNGÜSÜ (BASİTLEŞTİRİLDİ) ---
             for (let r = 0; r < count; r++) {
                 for (let c = 0; c < count; c++) {
                     if (qrData.isDark(r, c)) {
-                        
-                        // Sadece Ana Köşeleri Atla
                         if (isFinderPattern(r, c, count)) {
                             continue; 
                         } 
-                        // Geri kalan HER ŞEY EMOJİDİR.
-                        // (Eskiden burada teknik kare kontrolü vardı, sildik)
                         else {
                             let x = printAreaX + c * tileW + tileW/2;
                             let y = printAreaY + r * tileH + tileH/2;
@@ -253,11 +271,7 @@
                 }
             }
 
-            // Ana Köşeleri Çiz
             drawLargeFinders(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
-            
-            // Sağ Alt Süs Köşesi
-            // drawExtraCorner(ctx, printAreaX, printAreaY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
         }
 
         function drawLargeFinders(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
@@ -273,14 +287,6 @@
             });
         }
 
-        function drawExtraCorner(ctx, startX, startY, tileW, tileH, count, color, frameStyle, dotStyle) {
-            let fw = tileW * 7;
-            let fh = tileH * 7;
-            let px = startX + (count - 7) * tileW;
-            let py = startY + (count - 7) * tileH;
-            drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle);
-        }
-
         function drawFinderElement(ctx, px, py, fw, fh, tileW, tileH, color, frameStyle, dotStyle) {
             ctx.save();
             ctx.fillStyle = color;
@@ -293,23 +299,14 @@
             ctx.restore();
         }
 
-        // --- ŞEKİL ÇİZİM MOTORU ---
         function drawCustomRect(ctx, x, y, w, h, style) {
             ctx.beginPath();
             let r = Math.min(w, h) / 2;
 
-            if (style === "square") {
-                ctx.rect(x, y, w, h);
-            } 
-            else if (style === "rounded") {
-                ctx.roundRect(x, y, w, h, r * 0.4);
-            } 
-            else if (style === "circle") {
-                ctx.roundRect(x, y, w, h, r);
-            } 
-            else if (style === "leaf") {
-                ctx.roundRect(x, y, w, h, [r, 0, r, 0]);
-            }
+            if (style === "square") { ctx.rect(x, y, w, h); } 
+            else if (style === "rounded") { ctx.roundRect(x, y, w, h, r * 0.4); } 
+            else if (style === "circle") { ctx.roundRect(x, y, w, h, r); } 
+            else if (style === "leaf") { ctx.roundRect(x, y, w, h, [r, 0, r, 0]); }
             else if (style === "diamond") {
                 ctx.moveTo(x + w/2, y); ctx.lineTo(x + w, y + h/2);
                 ctx.lineTo(x + w/2, y + h); ctx.lineTo(x, y + h/2);
@@ -344,6 +341,49 @@
                 btn.innerText = "✅ İNDİRİLDİ";
                 setTimeout(() => btn.innerHTML = `💾 42x32cm JPEG İNDİR`, 3000);
             }, 500);
+        }
+
+        // ==========================================
+        // YENİ EKLENEN PDF FONKSİYONLARI (BAĞIMSIZ)
+        // ==========================================
+        
+        function handlePdfSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    pdfImgData = evt.target.result; // Resmi hafızaya al
+                    document.getElementById('pdfText').innerText = "✅ " + file.name + " (Hazır)";
+                    document.querySelector('.upload-area[onclick*="pdfInput"]').style.borderColor = "#e63946";
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function generatePDF() {
+            if(!pdfImgData) {
+                alert("Önce baskı için bir resim yüklemelisiniz!");
+                return;
+            }
+
+            // jsPDF Kütüphanesini Çağır
+            const { jsPDF } = window.jspdf;
+
+            // 1. DOKÜMAN AYARLARI
+            // 'l' = landscape (yatay)
+            // 'cm' = birim (santimetre)
+            // [42, 32] = Sayfa Boyutu (Senin özel ölçün)
+            const doc = new jsPDF('l', 'cm', [42, 32]);
+
+            // 2. RESMİ YERLEŞTİR (Upscale ve Ortalama)
+            // x = 1, y = 1 (Kenarlardan 1cm boşluk bırakır)
+            // w = 40, h = 30 (Resim boyutu tam 40x30 olur)
+            // Bu işlem resmi vektörel PDF içinde 40x30cm boyutuna yayar.
+            doc.addImage(pdfImgData, 'JPEG', 1, 1, 40, 30);
+
+            // 3. İNDİR
+            let timeStamp = new Date().toISOString().slice(0,10);
+            doc.save(`Baski_40x30_${timeStamp}.pdf`);
         }
     </script>
 </body>
