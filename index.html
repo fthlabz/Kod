@@ -103,8 +103,8 @@
     </div>
     <input type="file" id="bgInput" accept="image/*" onchange="handleImage(event)">
 
-    <label>Resim Parlaklığı: <span id="opVal">40%</span></label>
-    <input type="range" id="bgOpacity" min="0" max="90" value="40" oninput="updateOpacityLabel(this.value)">
+    <label>Resim Görünürlüğü: <span id="opVal">80%</span></label>
+    <input type="range" id="bgOpacity" min="0" max="95" value="80" oninput="updateOpacityLabel(this.value)">
 
     <div class="row">
         <div class="col">
@@ -147,7 +147,6 @@
         <div id="uidDisplay" style="font-size:10px; color:#333; margin-top:5px;"></div>
     </div>
 
-    <!-- MODIFIED: UPSCALE / JPEG ÇIKTI (42x32 sayfa içinde 40x30 alan; 2mm iç pay) -->
     <button class="btn-dl" id="dlBtn" onclick="downloadUpscaledPrintJPG()">💾 42x32cm JPEG İNDİR (40x30 + 2mm pay)</button>
 
     <div class="pdf-section">
@@ -160,10 +159,8 @@
         </div>
         <input type="file" id="pdfInput" accept="image/*" onchange="handlePdfSelect(event)">
 
-        <!-- PDF (42x32) içinde 40x30 ortalı -->
         <button class="btn-pdf" onclick="generatePDF()">📄 PDF OLARAK KAYDET (42x32 / 40x30 Ortalı)</button>
 
-        <!-- NEW: JPEG (40x30) tek parça + 2mm pay -->
         <button class="btn-jpg" onclick="downloadUploadedAs4030JPG()">🖼️ 40x30 JPEG İNDİR (2mm pay)</button>
     </div>
 </div>
@@ -214,6 +211,8 @@
                 bgImgObj.onload = () => {
                     document.querySelector('.upload-text').innerText = "✅ " + file.name;
                     document.querySelector('.upload-area').style.borderColor = "#ffdd00";
+                    // Resim yüklendiğinde otomatik olarak generate edelim ki kullanıcı hemen görsün
+                    // generate(); // İstersen açabilirsin
                 };
                 bgImgObj.src = evt.target.result;
             };
@@ -223,6 +222,12 @@
 
     function updateOpacityLabel(val) {
         document.getElementById('opVal').innerText = val + '%';
+        // Canlı önizleme için (eğer generate yapılmışsa tekrar çiz)
+        if(qrData) {
+           let canvas = document.getElementById("previewCanvas");
+           // Küçük önizleme ölçeği
+           drawArt(canvas, canvas.width, canvas.height); 
+        }
     }
 
     // =========================
@@ -247,6 +252,10 @@
 
         let canvas = document.getElementById("previewCanvas");
         let scale = 0.15;
+        // Canvas boyutlarını ayarla
+        canvas.width = PAGE_W * scale;
+        canvas.height = PAGE_H * scale;
+
         drawArt(canvas, PAGE_W * scale, PAGE_H * scale);
 
         document.getElementById("uidDisplay").innerText = "ID: " + uid;
@@ -259,9 +268,7 @@
     // =========================
     function drawArt(canvas, w, h) {
         let ctx = canvas.getContext("2d");
-        canvas.width = w;
-        canvas.height = h;
-
+        
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, w, h);
 
@@ -271,12 +278,17 @@
         let printAreaW = PRINT_W * scaleFactor;
         let printAreaH = PRINT_H * scaleFactor;
 
+        // ARKA PLAN RESMİ ÇİZİMİ
         if (bgImgObj) {
             ctx.save();
             ctx.drawImage(bgImgObj, 0, 0, w, h);
+            
+            // Beyazlık/Parlaklık efekti
             let opacity = document.getElementById("bgOpacity").value / 100;
+            // Opacity 100 ise resim tam görünür (alpha 0). 0 ise tam beyaz (alpha 1).
             ctx.fillStyle = `rgba(255, 255, 255, ${1 - opacity})`;
             ctx.fillRect(0, 0, w, h);
+            
             ctx.restore();
         }
 
@@ -365,7 +377,6 @@
 
     // ==========================================================
     // MODIFIED: UPSCALE/JPEG ÇIKTI
-    // 42x32 beyaz sayfa içinde 40x30 baskı alanı ve 2mm iç pay
     // ==========================================================
     function renderQRPrintPageToCanvas(canvas) {
         if (!qrData) {
@@ -391,7 +402,7 @@
             ctx.restore();
         }
 
-        // 3) Baskı alanı içinde 2mm beyaz pay bırakıp QR'ı o iç alana çiz
+        // 3) Baskı alanı koordinatları
         const printX = Math.round(MARGIN_X);
         const printY = Math.round(MARGIN_Y);
 
@@ -400,9 +411,14 @@
         const innerW = PRINT_W - 2 * INNER_MARGIN_PX;
         const innerH = PRINT_H - 2 * INNER_MARGIN_PX;
 
-        // İç alanın zemini beyaz kalsın (pay net görünsün)
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(printX, printY, PRINT_W, PRINT_H);
+        // --- DÜZELTME BAŞLANGIÇ ---
+        // ESKİ KOD HATASI: ctx.fillRect(printX, printY, PRINT_W, PRINT_H); -> Bu kod resmi kapatıyordu.
+        // YENİ KOD: Sadece resim YOKSA beyaz zemin at. Resim varsa dokunma.
+        if (!bgImgObj) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(printX, printY, PRINT_W, PRINT_H);
+        }
+        // --- DÜZELTME BİTİŞ ---
 
         const count = qrData.getModuleCount();
         const tileW = innerW / count;
@@ -430,7 +446,7 @@
             }
         }
 
-        // Finder'lar da aynı iç alana göre
+        // Finder'lar
         drawLargeFinders(ctx, innerX, innerY, tileW, tileH, count, mainColor, frameStyle, dotStyle);
         return true;
     }
